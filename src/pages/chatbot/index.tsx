@@ -25,19 +25,26 @@ interface Message {
   id: number;
   role: string;
   msg: string | object; // Update the type to accept either a string or an object
+  type?: string;
+}
+
+interface Suggestions {
+  category: string;
+  question: string;
+  vertical: string;
 }
 
 const Chatbot = (props: ChatbotProps) => {
-  const defaultMessage = {
-    id: Date.now(),
-    role: 'BOT',
-    msg: 'Default msg',
-  };
+  // const defaultMessage = {
+  //   id: Date.now(),
+  //   role: 'BOT',
+  //   msg: 'Default msg',
+  // };
   const [anchorEl, setAnchorEl] = useState<HTMLDivElement | null>(null);
   const [open, setOpen] = useState(false);
   const [message, setMessage] = useState('');
   const [placement, setPlacement] = useState<PopperPlacementType>();
-  const [chatMessages, setChatMessages] = useState<Message[]>([defaultMessage]);
+  const [chatMessages, setChatMessages] = useState<Message[]>([]);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   const scrollToBottom = () => {
@@ -46,8 +53,9 @@ const Chatbot = (props: ChatbotProps) => {
       chatWindow.scrollTop = chatWindow.scrollHeight;
     }
   };
+
   const loadChatHistory = async () => {
-    const response = await fetch('https://hackathonchat.free.beeceptor.com/chatHistory');
+    const response = await fetch('http://localhost:8080/api/v1/data?fileIds=c02d77ef-9be3-472e-86cd-9e0a5b35e599');
     const data = await response.json();
 
     data.forEach((item: any) => {
@@ -65,15 +73,83 @@ const Chatbot = (props: ChatbotProps) => {
       setChatMessages(prevMessages => [...prevMessages, responseMessage]);
     });
   };
+
+  const _chatWithfileID = async () => {
+    const data = {
+      fileId: 'c02d77ef-9be3-472e-86cd-9e0a5b35e599',
+      question: message || "give me insurer's name",
+      docType: 'POLICY_DOCUMENT',
+    };
+    try {
+      const response = await fetch('http://localhost:8080/api/v1/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ ...data }),
+      });
+
+      if (response.ok) {
+        // POST request successful
+        const responseData = await response.json();
+        const { question, answer } = responseData || {};
+        // Process the response data
+        console.log('responseData', question, answer);
+        const _msg_obj_res: Message = {
+          id: Date.now(),
+          role: 'BOT',
+          msg: answer || '',
+        };
+        setChatMessages(prevMessages => [...prevMessages, _msg_obj_res]);
+      } else {
+        // POST request failed
+        // Handle the error
+      }
+    } catch (error) {
+      // Error occurred during the POST request
+      // Handle the error
+    }
+  };
+
+  const _suggestions = async () => {
+    try {
+      const response = await fetch('http://localhost:8080/api/v1/autocomplete/suggestions?prefix=what&vertical=FW');
+      let _RES_OBJ: any = [];
+      if (response.ok) {
+        // POST request successful
+        const responseData = await response.json();
+        if (responseData) {
+          _RES_OBJ = responseData.map((_ele: Suggestions) => ({
+            id: Date.now(),
+            role: 'BOT',
+            msg: _ele.question || '',
+            type: 'suggestion',
+          }));
+        }
+        // Process the response data
+        console.log('responseData', _RES_OBJ);
+        setChatMessages(prevMessages => [...prevMessages, ..._RES_OBJ]);
+      } else {
+        // POST request failed
+        // Handle the error
+      }
+    } catch (error) {
+      // Error occurred during the POST request
+      // Handle the error
+    }
+  };
+
   useEffect(() => {
     // Fetch the API response
     loadChatHistory();
+    // scrollToBottom();
   }, []);
 
   const handleClick = (newPlacement: PopperPlacementType) => (event: React.MouseEvent<HTMLDivElement>) => {
     setAnchorEl(event.currentTarget);
     setOpen(prev => placement !== newPlacement || !prev);
     setPlacement(newPlacement);
+    scrollToBottom();
   };
 
   const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -82,24 +158,8 @@ const Chatbot = (props: ChatbotProps) => {
     setMessage(_in_str);
   };
 
-  // const handleSend = (event: FormEvent<HTMLFormElement>) => {
-  //   event.preventDefault();
-  //   const _msg_obj: Message = {
-  //     id: Date.now(),
-  //     role: 'Customer',
-  //     msg: message,
-  //   };
-  //   setChatMessages(prevMessages => [...prevMessages, _msg_obj]);
-  // };
-
   const appendMessage = async (event: any) => {
     event.preventDefault();
-    // const newMessage: Message = {
-    //   id: Date.now(),
-    //   content,
-    //   sender,
-    // };
-    // setChatMessages(prevMessages => [...prevMessages, newMessage]);
     if (message) {
       // eslint-disable-next-line no-underscore-dangle, @typescript-eslint/naming-convention
       const _msg_obj: Message = {
@@ -107,6 +167,10 @@ const Chatbot = (props: ChatbotProps) => {
         role: 'Customer',
         msg: message || '',
       };
+      _chatWithfileID();
+      if (message === 'FW') {
+        _suggestions();
+      }
       setChatMessages(prevMessages => [...prevMessages, _msg_obj]);
 
       // Clear the input field
@@ -114,7 +178,7 @@ const Chatbot = (props: ChatbotProps) => {
       scrollToBottom();
     }
   };
-  console.log(`Chatbot`, props);
+  console.log(`Chatbot`, chatMessages);
   return (
     <Main meta={<Meta title="Chatbot" description="Chatbot" />}>
       <ChatbotWrapper className="flex flex-row">
