@@ -6,17 +6,28 @@ const GlobalStyle = createGlobalStyle`
       color: #fff
     }
     ._c_content {
-     ._l_chat, ._r_chat {
-      // border: 1px solid red;
+      & > div {
+      }
+      ._r_chat {
+        ._arrow {
+          width: 0;
+          height: 0;
+          border-top: 8px solid transparent;
+          border-bottom: 8px solid transparent;
+          border-right: 8px solid #ced9e1;
+          position: absolute;
+          left: -8px;
+          top: 13px;
+        }
         ._prof {
           width: 40px;
           height: 40px;
-          border: 1px solid red;
+          border: 1px solid #ced9e1;
         }
         ._conv {
-          border: solid 1px  #dedede;
-          font-size: 14px
-
+          border: solid 1px #dedede;
+          font-size: 14px;
+          line-height: 18px;
         }
      }
     }

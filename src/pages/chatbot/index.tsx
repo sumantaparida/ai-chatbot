@@ -34,15 +34,34 @@ const Chatbot = (props: ChatbotProps) => {
             <Fade {...TransitionProps} timeout={350}>
               <Paper className="_chat_bot_content flex flex-col" elevation={4}>
                 <div className="flex flex-col _c_header p-2 bg-gray-900">Renewal</div>
-                <div className="flex flex-1 flex-col _c_content p-2 relative gap-2">
-                  <div className="_l_chat flex flex-row gap-2">
+                <div className="flex flex-1 flex-col _c_content p-2 relative gap-2 overflow-auto">
+                  {[1, 2, 3, 4, 3, 3, 3].map(ele => {
+                    return (
+                      <div key={ele} className="_r_chat flex flex-row gap-2 even:flex-row-reverse">
+                        <div className="rounded-full _prof flex flex-col items-center justify-center bg-slate-400">s</div>
+                        <div className="flex flex-col _conv p-2 rounded-md font-normal flex-1 relative">
+                          Testing testing testing Testing testing testing Testing testing testing Testing testing testing Testing testing testing Testing
+                          testing testing
+                          <div className="_arrow"></div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                  {/* <div className="_l_chat flex flex-row gap-2">
                     <div className="rounded-full _prof flex flex-col items-center justify-center bg-slate-400">s</div>
-                    <div className="flex flex-col _conv p-2 rounded-md font-normal">Testing testing testing</div>
+                    <div className="flex flex-col _conv p-2 rounded-md font-normal flex-1 relative">
+                      Testing testing testing Testing testing testing Testing testing testing Testing testing testing Testing testing testing Testing testing
+                      testing
+                      <div className="_arrow"></div>
+                    </div>
                   </div>
-                  <div className="_r_chat flex gap-2 flex-row-reverse">
+                  <div className="_r_chat flex gap-2 even:flex-row-reverse">
                     <div className="rounded-full _prof flex flex-col items-center justify-center bg-slate-400">s</div>
-                    <div className="flex flex-col _conv p-2 rounded-md font-normal">Testing testing testing</div>
-                  </div>
+                    <div className="flex flex-col flex-1 _conv p-2 rounded-md font-normal">
+                      Testing testing testing Testing testing testing Testing testing testing Testing testing testing Testing testing testing Testing testing
+                      testing
+                    </div>
+                  </div> */}
                 </div>
                 <div className="flex flex-row _input_box">input</div>
               </Paper>
