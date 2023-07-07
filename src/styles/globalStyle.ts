@@ -18,7 +18,10 @@ const GlobalStyle = createGlobalStyle`
           font-size: 14px
 
         }
-     } 
+     }
+    }
+    ._input_box {
+      border: solid 1px red
     }
   }
   ._chat_bot_content {

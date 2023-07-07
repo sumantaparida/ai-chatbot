@@ -32,9 +32,9 @@ const Chatbot = (props: ChatbotProps) => {
         <Popper open={open} anchorEl={anchorEl} placement={placement} transition className="_chat_bot_wrapper">
           {({ TransitionProps }) => (
             <Fade {...TransitionProps} timeout={350}>
-              <Paper className="_chat_bot_content" elevation={4}>
+              <Paper className="_chat_bot_content flex flex-col" elevation={4}>
                 <div className="flex flex-col _c_header p-2 bg-gray-900">Renewal</div>
-                <div className="flex flex-col _c_content p-2 relative">
+                <div className="flex flex-1 flex-col _c_content p-2 relative gap-2">
                   <div className="_l_chat flex flex-row gap-2">
                     <div className="rounded-full _prof flex flex-col items-center justify-center bg-slate-400">s</div>
                     <div className="flex flex-col _conv p-2 rounded-md font-normal">Testing testing testing</div>
@@ -44,6 +44,7 @@ const Chatbot = (props: ChatbotProps) => {
                     <div className="flex flex-col _conv p-2 rounded-md font-normal">Testing testing testing</div>
                   </div>
                 </div>
+                <div className="flex flex-row _input_box">input</div>
               </Paper>
             </Fade>
           )}
