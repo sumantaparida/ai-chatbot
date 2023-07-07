@@ -15,12 +15,11 @@ export default function App() {
   return (
     <div className="App">
       <MetaTags>
-        <title> COVID-19-Chatbot </title>
-        <meta name="description" content="COVID 19 assistance chatbot." />
+        <title> Chat with policy document </title>
+        <meta name="description" content="Chat with policy document" />
       </MetaTags>
       <Fade bottom cascade>
-        <h1>COVID-19-Chatbot</h1>
-        <h2>Start chatting with the COVID-19-Chatbot!</h2>
+        <h1>Chat with policy document</h1>
       </Fade>
       <TypedReact />
       {showBot && (

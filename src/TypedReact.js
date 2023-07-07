@@ -13,7 +13,7 @@ const TypedReact = () => {
         showCursor: true,
         strings: [
           "Click on the Bot icon to get started",
-          "Type in tell a joke and see what happens..."
+          "Type polices related imformation."
         ],
         typeSpeed: 50,
         backSpeed: 50,
