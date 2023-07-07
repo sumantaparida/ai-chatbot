@@ -1,9 +1,9 @@
+import type { ChangeEvent, ReactNode } from 'react';
 import Fade from '@mui/material/Fade';
 import Paper from '@mui/material/Paper';
 import type { PopperPlacementType } from '@mui/material/Popper';
 import Popper from '@mui/material/Popper';
 import Image from 'next/image';
-import type { ChangeEvent, FormEvent } from 'react';
 import React, { useEffect, useRef, useState } from 'react';
 
 import { Meta } from '@/layouts/Meta';
@@ -12,18 +12,32 @@ import { Main } from '@/templates/Main';
 
 import ChatbotWrapper from './style';
 
-type Message = {
-  id: number;
-  content: string;
-  sender: 'user' | 'bot';
+type ChatbotProps = {
+  children?: ReactNode;
 };
 
-const Chatbot = () => {
+// type Message = {
+//   id: number;
+//   role: string;
+//   msg: string;
+// };
+interface Message {
+  id: number;
+  role: string;
+  msg: string | object; // Update the type to accept either a string or an object
+}
+
+const Chatbot = (props: ChatbotProps) => {
+  const defaultMessage = {
+    id: Date.now(),
+    role: 'bot',
+    msg: 'Default msg',
+  };
   const [anchorEl, setAnchorEl] = useState<HTMLDivElement | null>(null);
   const [open, setOpen] = useState(false);
   const [message, setMessage] = useState('');
   const [placement, setPlacement] = useState<PopperPlacementType>();
-  const [chatMessages, setChatMessages] = useState<Message[]>([]);
+  const [chatMessages, setChatMessages] = useState<Message[]>([defaultMessage]);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   const scrollToBottom = () => {
@@ -43,34 +57,39 @@ const Chatbot = () => {
   };
 
   const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setMessage(event.target.value);
+    const _in_str = event.target.value;
+    setMessage(_in_str);
   };
 
-  const handleSend = (event: FormEvent<HTMLFormElement>) => {
+  // const handleSend = (event: FormEvent<HTMLFormElement>) => {
+  //   event.preventDefault();
+  //   const _msg_obj: Message = {
+  //     id: Date.now(),
+  //     role: 'user',
+  //     msg: message,
+  //   };
+  //   setChatMessages(prevMessages => [...prevMessages, _msg_obj]);
+  // };
+
+  const appendMessage = (event: any) => {
     event.preventDefault();
-
-    if (message.trim() !== '') {
-      const newMessage: Message = {
+    // const newMessage: Message = {
+    //   id: Date.now(),
+    //   content,
+    //   sender,
+    // };
+    // setChatMessages(prevMessages => [...prevMessages, newMessage]);
+    if (message) {
+      const _msg_obj: Message = {
         id: Date.now(),
-        content: message,
-        sender: 'user',
+        role: 'user',
+        msg: message || '',
       };
-
-      setChatMessages(prevMessages => [...prevMessages, newMessage]);
+      setChatMessages(prevMessages => [...prevMessages, _msg_obj]);
       setMessage('');
     }
   };
-
-  const appendMessage = (content: string, sender: 'user' | 'bot') => {
-    const newMessage: Message = {
-      id: Date.now(),
-      content,
-      sender,
-    };
-
-    setChatMessages(prevMessages => [...prevMessages, newMessage]);
-  };
-
+  console.log(`Chatbot`, props);
   return (
     <Main meta={<Meta title="Chatbot" description="Chatbot" />}>
       <ChatbotWrapper className="flex flex-row">
@@ -80,18 +99,21 @@ const Chatbot = () => {
               <Paper className="_chat_bot_content flex flex-col" elevation={4}>
                 <div className="_c_header flex flex-col bg-gray-900 p-2">Renewal</div>
                 <div className="_c_content relative flex flex-1 flex-col gap-2 overflow-auto p-2">
-                  {chatMessages.map(mes => (
-                    <div key={mes.id} className={`_r_chat flex flex-row gap-2 ${mes.sender === 'user' ? '' : 'even:flex-row-reverse'}`}>
-                      <div className="_prof flex flex-col items-center justify-center rounded-full bg-slate-400">s</div>
-                      <div className="_conv relative flex flex-1 flex-col rounded-md p-2 font-normal">
-                        {mes.content}
-                        <div className="_arrow" />
+                  {chatMessages.map(mes => {
+                    const { msg, role }: { msg: any; role: string } = mes || {};
+                    return (
+                      <div key={mes.id} className={`_r_chat flex flex-row gap-2 ${role === 'user' ? 'user flex-row-reverse' : 'bot'}`}>
+                        <div className="_prof flex flex-col items-center justify-center rounded-full bg-slate-400">s</div>
+                        <div className="_conv relative flex flex-1 flex-col rounded-md p-2 font-normal">
+                          {msg}
+                          <div className="_arrow" />
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
                 <div className="flex items-center gap-5 py-2">
-                  <form onSubmit={handleSend} className="grow">
+                  <form className="grow" onSubmit={appendMessage}>
                     <input
                       title="message"
                       type="text"
@@ -103,7 +125,7 @@ const Chatbot = () => {
                   <button
                     type="submit"
                     className="mr-2 rounded-md bg-gray-700 px-4 py-2 text-white hover:bg-gray-800 focus:outline-none"
-                    onClick={() => appendMessage(message, 'user')}
+                    onClick={appendMessage}
                   >
                     Send
                   </button>
