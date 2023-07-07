@@ -1,5 +1,5 @@
 import { createGlobalStyle } from 'styled-components';
- 
+
 const GlobalStyle = createGlobalStyle`
   ._chat_bot_wrapper {
     ._c_header {
@@ -9,7 +9,7 @@ const GlobalStyle = createGlobalStyle`
       & > div {
       }
       ._r_chat {
-        &.user {
+        &.Customer {
           ._arrow {
             right: -8px;
             top: 13px;
@@ -18,7 +18,7 @@ const GlobalStyle = createGlobalStyle`
             border-left: 8px solid #ced9e1;
           }
         }
-        &.bot {
+        &.BOT {
           ._arrow {
             left: -8px;
             top: 13px;
@@ -56,5 +56,5 @@ const GlobalStyle = createGlobalStyle`
     color: #000 !important;
   }
 `;
- 
+
 export default GlobalStyle;

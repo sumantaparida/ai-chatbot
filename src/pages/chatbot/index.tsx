@@ -1,9 +1,9 @@
-import type { ChangeEvent, ReactNode } from 'react';
 import Fade from '@mui/material/Fade';
 import Paper from '@mui/material/Paper';
 import type { PopperPlacementType } from '@mui/material/Popper';
 import Popper from '@mui/material/Popper';
 import Image from 'next/image';
+import type { ChangeEvent, ReactNode } from 'react';
 import React, { useEffect, useRef, useState } from 'react';
 
 import { Meta } from '@/layouts/Meta';
@@ -30,7 +30,7 @@ interface Message {
 const Chatbot = (props: ChatbotProps) => {
   const defaultMessage = {
     id: Date.now(),
-    role: 'bot',
+    role: 'BOT',
     msg: 'Default msg',
   };
   const [anchorEl, setAnchorEl] = useState<HTMLDivElement | null>(null);
@@ -46,9 +46,29 @@ const Chatbot = (props: ChatbotProps) => {
       chatWindow.scrollTop = chatWindow.scrollHeight;
     }
   };
+  const loadChatHistory = async () => {
+    const response = await fetch('https://hackathonchat.free.beeceptor.com/chatHistory');
+    const data = await response.json();
+
+    data.forEach((item: any) => {
+      // Extract the userType from the API response
+      const { userType } = item;
+
+      // Create a new message object for the bot response
+      const responseMessage: Message = {
+        id: Date.now(),
+        role: userType === 'Customer' ? 'Customer' : 'BOT',
+        msg: item.content || '', // Update this based on your API response structure
+      };
+
+      // Add the bot message to the chat messages
+      setChatMessages(prevMessages => [...prevMessages, responseMessage]);
+    });
+  };
   useEffect(() => {
-    scrollToBottom();
-  }, [chatMessages]);
+    // Fetch the API response
+    loadChatHistory();
+  }, []);
 
   const handleClick = (newPlacement: PopperPlacementType) => (event: React.MouseEvent<HTMLDivElement>) => {
     setAnchorEl(event.currentTarget);
@@ -57,6 +77,7 @@ const Chatbot = (props: ChatbotProps) => {
   };
 
   const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
+    // eslint-disable-next-line @typescript-eslint/naming-convention, no-underscore-dangle
     const _in_str = event.target.value;
     setMessage(_in_str);
   };
@@ -65,13 +86,13 @@ const Chatbot = (props: ChatbotProps) => {
   //   event.preventDefault();
   //   const _msg_obj: Message = {
   //     id: Date.now(),
-  //     role: 'user',
+  //     role: 'Customer',
   //     msg: message,
   //   };
   //   setChatMessages(prevMessages => [...prevMessages, _msg_obj]);
   // };
 
-  const appendMessage = (event: any) => {
+  const appendMessage = async (event: any) => {
     event.preventDefault();
     // const newMessage: Message = {
     //   id: Date.now(),
@@ -80,13 +101,17 @@ const Chatbot = (props: ChatbotProps) => {
     // };
     // setChatMessages(prevMessages => [...prevMessages, newMessage]);
     if (message) {
+      // eslint-disable-next-line no-underscore-dangle, @typescript-eslint/naming-convention
       const _msg_obj: Message = {
         id: Date.now(),
-        role: 'user',
+        role: 'Customer',
         msg: message || '',
       };
       setChatMessages(prevMessages => [...prevMessages, _msg_obj]);
+
+      // Clear the input field
       setMessage('');
+      scrollToBottom();
     }
   };
   console.log(`Chatbot`, props);
@@ -102,7 +127,7 @@ const Chatbot = (props: ChatbotProps) => {
                   {chatMessages.map(mes => {
                     const { msg, role }: { msg: any; role: string } = mes || {};
                     return (
-                      <div key={mes.id} className={`_r_chat flex flex-row gap-2 ${role === 'user' ? 'user flex-row-reverse' : 'bot'}`}>
+                      <div key={mes.id} className={`_r_chat flex flex-row gap-2 ${role === 'Customer' ? 'Customer flex-row-reverse' : 'BOT'}`}>
                         <div className="_prof flex flex-col items-center justify-center rounded-full bg-slate-400">s</div>
                         <div className="_conv relative flex flex-1 flex-col rounded-md p-2 font-normal">
                           {msg}
