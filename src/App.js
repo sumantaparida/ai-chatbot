@@ -26,6 +26,7 @@ export default function App() {
         <Fade big>
           <div className="app-chatbot-container">
             <Chatbot
+              headerText="Welcome to chatbot"
               config={config}
               messageParser={MessageParser}
               actionProvider={ActionProvider}

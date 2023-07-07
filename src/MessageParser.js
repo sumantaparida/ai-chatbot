@@ -6,10 +6,10 @@ class MessageParser {
 
   parse(message) {
     message = message.toLowerCase();
-    console.log(message);
+    console.log('Typed', message);
 
     if (
-      message.includes("options") ||
+      message.includes("vertical") ||
       message.includes("help") ||
       message.includes("do for me")
     ) {
@@ -34,7 +34,7 @@ class MessageParser {
     ) {
       return [
         this.actionProvider.handleGlobalStats(),
-        this.actionProvider.handleLocalStats()
+        // this.actionProvider.handleLocalStats()
       ];
     }
 
