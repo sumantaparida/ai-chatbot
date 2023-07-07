@@ -118,3 +118,8 @@
 .app-chatbot-button-icon {
   fill: #fff;
 }
+
+.b_p_s {
+  border-radius: 10px;
+  border: 1px solid red;
+}

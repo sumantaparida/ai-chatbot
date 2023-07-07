@@ -93,7 +93,6 @@ class ActionProvider {
 
   handleThanks = () => {
     const message = this.createChatBotMessage("You're welcome, and stay safe!");
-
     this.addMessageToState(message);
   };
 

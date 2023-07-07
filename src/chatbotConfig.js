@@ -19,7 +19,7 @@ const config = {
   },
   initialMessages: [
     createChatBotMessage(
-      `Hi, I'm here to provide you with latest COVID 19 data to keep you safe!`
+      `Hi, I'm here to provide you with policies related information`
     ),
     createChatBotMessage(
       "Here's a quick overview of what I can help you with. You can also type in.",
