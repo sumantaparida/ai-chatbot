@@ -27,11 +27,11 @@ const Chatbot = () => {
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   const scrollToBottom = () => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    const chatWindow = document.getElementsByClassName('_c_content')[0];
+    if (chatWindow) {
+      chatWindow.scrollTop = chatWindow.scrollHeight;
     }
   };
-
   useEffect(() => {
     scrollToBottom();
   }, [chatMessages]);
@@ -79,9 +79,9 @@ const Chatbot = () => {
             <Fade {...TransitionProps} timeout={350}>
               <Paper className="_chat_bot_content flex flex-col" elevation={4}>
                 <div className="_c_header flex flex-col bg-gray-900 p-2">Renewal</div>
-                <div className="_c_content relative flex flex-1 flex-col gap-2 overflow-auto p-2">
+                <div className="_c_content relative flex flex-1 flex-col gap-2 overflow-auto p-2 chatWindow">
                   {chatMessages.map(mes => (
-                    <div key={mes.id} className={`_r_chat flex flex-row gap-2 ${mes.sender === 'user' ? '' : 'even:flex-row-reverse'}`}>
+                    <div key={mes.id} className={`_r_chat flex flex-row gap-2 ${mes.sender === 'user' ? 'even:flex-row-reverse' : ''}`}>
                       <div className="_prof flex flex-col items-center justify-center rounded-full bg-slate-400">s</div>
                       <div className="_conv relative flex flex-1 flex-col rounded-md p-2 font-normal">
                         {mes.content}
