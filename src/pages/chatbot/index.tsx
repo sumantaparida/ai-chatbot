@@ -1,29 +1,74 @@
-/* eslint-disable tailwindcss/no-custom-classname */
-import React, { ReactNode } from 'react';
-import Popper, { PopperPlacementType } from '@mui/material/Popper';
 import Fade from '@mui/material/Fade';
-import { Meta } from '@/layouts/Meta';
-import { Main } from '@/templates/Main';
 import Paper from '@mui/material/Paper';
-import bIcon from '@/public/icons/bot.svg';
+import type { PopperPlacementType } from '@mui/material/Popper';
+import Popper from '@mui/material/Popper';
 import Image from 'next/image';
+import type { ChangeEvent, FormEvent } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+
+import { Meta } from '@/layouts/Meta';
+import bIcon from '@/public/icons/bot.svg';
+import { Main } from '@/templates/Main';
 
 import ChatbotWrapper from './style';
 
-type ChatbotProps = {
-  children?: ReactNode;
+type Message = {
+  id: number;
+  content: string;
+  sender: 'user' | 'bot';
 };
 
-const Chatbot = (props: ChatbotProps) => {
-  const [anchorEl, setAnchorEl] = React.useState<HTMLDivElement | null>(null);
-  const [open, setOpen] = React.useState(false);
-  const [placement, setPlacement] = React.useState<PopperPlacementType>();
-  console.log(`Chatbot`, props);
+const Chatbot = () => {
+  const [anchorEl, setAnchorEl] = useState<HTMLDivElement | null>(null);
+  const [open, setOpen] = useState(false);
+  const [message, setMessage] = useState('');
+  const [placement, setPlacement] = useState<PopperPlacementType>();
+  const [chatMessages, setChatMessages] = useState<Message[]>([]);
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
+
+  const scrollToBottom = () => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [chatMessages]);
 
   const handleClick = (newPlacement: PopperPlacementType) => (event: React.MouseEvent<HTMLDivElement>) => {
     setAnchorEl(event.currentTarget);
     setOpen(prev => placement !== newPlacement || !prev);
     setPlacement(newPlacement);
+  };
+
+  const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setMessage(event.target.value);
+  };
+
+  const handleSend = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (message.trim() !== '') {
+      const newMessage: Message = {
+        id: Date.now(),
+        content: message,
+        sender: 'user',
+      };
+
+      setChatMessages(prevMessages => [...prevMessages, newMessage]);
+      setMessage('');
+    }
+  };
+
+  const appendMessage = (content: string, sender: 'user' | 'bot') => {
+    const newMessage: Message = {
+      id: Date.now(),
+      content,
+      sender,
+    };
+
+    setChatMessages(prevMessages => [...prevMessages, newMessage]);
   };
 
   return (
@@ -33,49 +78,49 @@ const Chatbot = (props: ChatbotProps) => {
           {({ TransitionProps }) => (
             <Fade {...TransitionProps} timeout={350}>
               <Paper className="_chat_bot_content flex flex-col" elevation={4}>
-                <div className="flex flex-col _c_header p-2 bg-gray-900">Renewal</div>
-                <div className="flex flex-1 flex-col _c_content p-2 relative gap-2 overflow-auto">
-                  {[1, 2, 3, 4, 3, 3, 3].map(ele => {
-                    return (
-                      <div key={ele} className="_r_chat flex flex-row gap-2 even:flex-row-reverse">
-                        <div className="rounded-full _prof flex flex-col items-center justify-center bg-slate-400">s</div>
-                        <div className="flex flex-col _conv p-2 rounded-md font-normal flex-1 relative">
-                          Testing testing testing Testing testing testing Testing testing testing Testing testing testing Testing testing testing Testing
-                          testing testing
-                          <div className="_arrow"></div>
-                        </div>
+                <div className="_c_header flex flex-col bg-gray-900 p-2">Renewal</div>
+                <div className="_c_content relative flex flex-1 flex-col gap-2 overflow-auto p-2">
+                  {chatMessages.map(mes => (
+                    <div key={mes.id} className={`_r_chat flex flex-row gap-2 ${mes.sender === 'user' ? '' : 'even:flex-row-reverse'}`}>
+                      <div className="_prof flex flex-col items-center justify-center rounded-full bg-slate-400">s</div>
+                      <div className="_conv relative flex flex-1 flex-col rounded-md p-2 font-normal">
+                        {mes.content}
+                        <div className="_arrow" />
                       </div>
-                    );
-                  })}
-                  {/* <div className="_l_chat flex flex-row gap-2">
-                    <div className="rounded-full _prof flex flex-col items-center justify-center bg-slate-400">s</div>
-                    <div className="flex flex-col _conv p-2 rounded-md font-normal flex-1 relative">
-                      Testing testing testing Testing testing testing Testing testing testing Testing testing testing Testing testing testing Testing testing
-                      testing
-                      <div className="_arrow"></div>
                     </div>
-                  </div>
-                  <div className="_r_chat flex gap-2 even:flex-row-reverse">
-                    <div className="rounded-full _prof flex flex-col items-center justify-center bg-slate-400">s</div>
-                    <div className="flex flex-col flex-1 _conv p-2 rounded-md font-normal">
-                      Testing testing testing Testing testing testing Testing testing testing Testing testing testing Testing testing testing Testing testing
-                      testing
-                    </div>
-                  </div> */}
+                  ))}
                 </div>
-                <div className="flex flex-row _input_box">input</div>
+                <div className="flex items-center gap-5 py-2">
+                  <form onSubmit={handleSend} className="grow">
+                    <input
+                      title="message"
+                      type="text"
+                      value={message}
+                      onChange={handleInputChange}
+                      className="ml-2 h-[36px] w-full rounded-md border border-gray-300 px-2 focus:outline-none"
+                    />
+                  </form>
+                  <button
+                    type="submit"
+                    className="mr-2 rounded-md bg-gray-700 px-4 py-2 text-white hover:bg-gray-800 focus:outline-none"
+                    onClick={() => appendMessage(message, 'user')}
+                  >
+                    Send
+                  </button>
+                </div>
               </Paper>
             </Fade>
           )}
         </Popper>
         <div
-          className="_boat_button flex flex-col fixed bottom-2 left-2 cursor-pointer bg-gray-500 rounded-full items-center justify-center border border-1 border-gray-500"
+          className="_boat_button border-1 fixed bottom-2 left-2 flex cursor-pointer flex-col items-center justify-center rounded-full border border-gray-500 bg-gray-500"
           role="presentation"
           onClick={handleClick('top-start')}
         >
           <Image src={bIcon} width={35} height={35} alt="Picture of the author" />
         </div>
       </ChatbotWrapper>
+      <div ref={messagesEndRef} />
     </Main>
   );
 };
