@@ -9,15 +9,28 @@ const GlobalStyle = createGlobalStyle`
       & > div {
       }
       ._r_chat {
+        &.user {
+          ._arrow {
+            right: -8px;
+            top: 13px;
+            border-top: 8px solid transparent;
+            border-bottom: 8px solid transparent;
+            border-left: 8px solid #ced9e1;
+          }
+        }
+        &.bot {
+          ._arrow {
+            left: -8px;
+            top: 13px;
+            border-top: 8px solid transparent;
+            border-bottom: 8px solid transparent;
+            border-right: 8px solid #ced9e1;
+          }
+        }
         ._arrow {
           width: 0;
           height: 0;
-          border-top: 8px solid transparent;
-          border-bottom: 8px solid transparent;
-          border-right: 8px solid #ced9e1;
           position: absolute;
-          left: -8px;
-          top: 13px;
         }
         ._prof {
           width: 40px;
@@ -28,6 +41,7 @@ const GlobalStyle = createGlobalStyle`
           border: solid 1px #dedede;
           font-size: 14px;
           line-height: 18px;
+          word-break: break-all;
         }
      }
     }
