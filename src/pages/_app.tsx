@@ -2,6 +2,7 @@ import '../styles/global.css';
 
 import { CssBaseline, ThemeProvider } from '@mui/material';
 import type { AppProps } from 'next/app';
+import GlobalStyle from '@/styles/globalStyle';
 
 import { theme } from '@/theme/theme';
 
@@ -11,6 +12,7 @@ const MyApp = ({ Component, pageProps }: AppProps) => {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <AnyComponent {...pageProps} />
+      <GlobalStyle />
     </ThemeProvider>
   );
   // <Component {...pageProps} />
