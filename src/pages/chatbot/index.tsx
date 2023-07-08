@@ -1,7 +1,10 @@
 // import Fade from '@mui/material/Fade';
-import Paper from '@mui/material/Paper';
 // import type { PopperPlacementType } from '@mui/material/Popper';
+import UploadFileIcon from '@mui/icons-material/UploadFile';
+import SendIcon from '@mui/icons-material/Send';
 import HelpSharpIcon from '@mui/icons-material/HelpSharp';
+import Paper from '@mui/material/Paper';
+import { color } from '@mui/system';
 // import Popper from '@mui/material/Popper';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -9,10 +12,10 @@ import type { ChangeEvent } from 'react';
 import React, { useEffect, useState } from 'react';
 
 import { Meta } from '@/layouts/Meta';
+import logoImage from '@/public/assets/images/logo_turtlemint.svg';
 // import bIcon from '@/public/icons/bot.svg';
 import _bIcon from '@/public/icons/suraj.jpeg';
 import { Main } from '@/templates/Main';
-import logoImage from '@/public/assets/images/logo_turtlemint.svg';
 
 import ChatbotWrapper from './style';
 
@@ -42,6 +45,8 @@ interface Props {}
 
 const Chatbot: React.FC<Props> = () => {
   const [message, setMessage] = useState('');
+  const [uploadedFileId, setUploadedFileId] = useState(null);
+  // const [placement, setPlacement] = useState<PopperPlacementType>();
   const [chatMessages, setChatMessages] = useState<Message[]>([]);
   const [getQuote, setQuote] = useState<Getquotes[]>([]);
 
@@ -54,9 +59,27 @@ const Chatbot: React.FC<Props> = () => {
     // messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  function getUrlParam(param: any) {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get(param);
+  }
   const loadChatHistory = async () => {
     try {
-      const response = await fetch('http://localhost:8080/api/v1/data?fileIds=58a1b8b3-74ae-452d-81b4-77e9eb662e24');
+      let apiUrl = 'http://localhost:8080/api/v1/data';
+      const idParam = getUrlParam('fileIds');
+      // const idParam = urlParams.get('id');
+      // urlParams.get('id');
+
+      if (idParam) {
+        apiUrl += `?fileIds=${idParam}`;
+      } else if (uploadedFileId) {
+        apiUrl += `?fileIds=${uploadedFileId}`;
+      } else {
+        console.log('No ID found in the URL or uploadedFileId is missing.');
+        return;
+      }
+
+      const response = await fetch(apiUrl);
       if (response.ok) {
         const data = await response.json();
         data.forEach((item: any) => {
@@ -74,14 +97,17 @@ const Chatbot: React.FC<Props> = () => {
           setChatMessages(prevMessages => [...prevMessages, responseMessage]);
         });
         _suggestions();
+      } else {
+        console.log('Failed to fetch chat history.');
       }
-    } catch (error) {}
+    } catch (error) {
+      console.error('Error while loading chat history:', error);
+    }
   };
 
-  // eslint-disable-next-line @typescript-eslint/naming-convention, no-underscore-dangle
   const _chatWithfileID = async (mes?: string, suggestion?: boolean) => {
     const data = {
-      fileId: 'c02d77ef-9be3-472e-86cd-9e0a5b35e599',
+      fileId: getUrlParam('fileIds') || uploadedFileId || '',
       question: mes || message || "give me insurer's name",
       docType: 'POLICY_DOCUMENT',
       suggestion,
@@ -112,10 +138,37 @@ const Chatbot: React.FC<Props> = () => {
     } catch (error) {}
   };
 
+  const handleFileUpload = event => {
+    const file = event.target.files[0]; // Get the uploaded file
+    console.log(file);
+    if (file && file.type === 'application/pdf') {
+      console.log('hi');
+      const formData = new FormData();
+      formData.append('file', file); // Append the file to the FormData object
+      console.log(formData);
+      // Make a POST request to the upload URL
+      fetch('http://localhost:8080/api/v1/document', {
+        method: 'POST',
+        body: formData,
+      })
+        .then(response => response.json())
+        .then(data => {
+          // Handle the response from the server
+          console.log('Upload successful:', data.processInfo.pid);
+          setUploadedFileId(data.processInfo.pid);
+        })
+        .catch(error => {
+          // Handle any error that occurred during the upload
+          console.error('Upload failed:', error);
+        });
+    } else {
+      console.log('Invalid file format. Please select a PDF file.');
+    }
+  };
+
   const _suggestions = async () => {
     try {
       const response = await fetch('http://localhost:8080/api/v1/autocomplete/suggestions?prefix=what&vertical=FW');
-      // eslint-disable-next-line no-underscore-dangle, @typescript-eslint/naming-convention
       let _RES_OBJ: any = {
         id: Date.now(),
         role: 'Customer',
@@ -180,7 +233,9 @@ const Chatbot: React.FC<Props> = () => {
         role: 'Customer',
         msg: message || '',
       };
-      _chatWithfileID();
+      if (getUrlParam('fileIds') || uploadedFileId) {
+        _chatWithfileID();
+      }
       if (message === 'FW') {
         _suggestions();
       }
@@ -202,7 +257,9 @@ const Chatbot: React.FC<Props> = () => {
       msg: mes || '',
     };
     setChatMessages(prevMessages => [...prevMessages, _msg_obj_res]);
-    _chatWithfileID(mes, true);
+    if (getUrlParam('fileIds') || uploadedFileId) {
+      _chatWithfileID(mes, true);
+    }
     // appendMessage(); // Call the appendMessage function to add the message to chatMessages
   };
   console.log(`Chatbot`, getQuote);
@@ -304,23 +361,44 @@ const Chatbot: React.FC<Props> = () => {
                 ) : null}
                 {/* <div ref={messagesEndRef} /> */}
               </div>
-              <div className="flex items-center gap-5 pt-2">
-                <form className="grow" onSubmit={appendMessage}>
-                  <input
-                    title="message"
-                    type="text"
-                    value={message}
-                    onChange={handleInputChange}
-                    className="ml-2 h-[36px] w-full rounded-md border border-gray-300 px-2 focus:outline-none"
-                  />
-                </form>
-                <button
-                  type="submit"
-                  className="mr-2 rounded-md bg-green-900 text-green-50 px-4 py2 hover:bg-green-950 focus:outline-none"
-                  onClick={appendMessage}
-                >
-                  Send
-                </button>
+              <div className="flex items-center flex-row justify-center p-2 bg-gray-300 mt-3">
+                <div className="flex flex-col">
+                  <label
+                    htmlFor="file-upload"
+                    className="rounded-md bg-green-900 text-green-50 px-2 hover:bg-green-950 focus:outline-none flex items-center"
+                    style={{ height: '2rem' }}
+                  >
+                    <UploadFileIcon className="item-center" style={{ height: '2rem' }} />
+                  </label>
+                  <input title="file" id="file-upload" type="file" accept=".pdf" style={{ display: 'none' }} onChange={handleFileUpload} />
+                </div>
+                <div className="flex flex-col flex-1">
+                  <form className="grow" onSubmit={appendMessage}>
+                    <input
+                      title="message"
+                      type="text"
+                      value={message}
+                      onChange={handleInputChange}
+                      onKeyDown={e => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault(); // Prevent form submission
+                          appendMessage(); // Call the appendMessage function
+                        }
+                      }}
+                      className="h-[36px] w-full rounded-md border border-gray-300 px-2 focus:outline-none ml-0"
+                    />
+                  </form>
+                </div>
+                <div className="flex flex-row">
+                  <button
+                    type="submit"
+                    className="mr-2 rounded-md bg-green-900 text-green-50 px-4 py-2 hover:bg-green-950 focus:outline-none flex items-center"
+                    onClick={appendMessage}
+                    style={{ height: '2rem' }}
+                  >
+                    <SendIcon className="py-2 item-center" style={{ transform: 'rotate(315deg)', height: '2rem' }} />
+                  </button>
+                </div>
               </div>
             </div>
           </div>
