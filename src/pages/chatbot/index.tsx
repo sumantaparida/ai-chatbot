@@ -1,11 +1,7 @@
-// import Fade from '@mui/material/Fade';
-// import type { PopperPlacementType } from '@mui/material/Popper';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import SendIcon from '@mui/icons-material/Send';
 import HelpSharpIcon from '@mui/icons-material/HelpSharp';
 import Paper from '@mui/material/Paper';
-import { color } from '@mui/system';
-// import Popper from '@mui/material/Popper';
 import Image from 'next/image';
 import Link from 'next/link';
 import type { ChangeEvent } from 'react';
@@ -13,7 +9,6 @@ import React, { useEffect, useState } from 'react';
 
 import { Meta } from '@/layouts/Meta';
 import logoImage from '@/public/assets/images/logo_turtlemint.svg';
-// import bIcon from '@/public/icons/bot.svg';
 import _bIcon from '@/public/icons/suraj.jpeg';
 import { Main } from '@/templates/Main';
 
@@ -138,7 +133,7 @@ const Chatbot: React.FC<Props> = () => {
     } catch (error) {}
   };
 
-  const handleFileUpload = event => {
+  const handleFileUpload = (event: any) => {
     const file = event.target.files[0]; // Get the uploaded file
     console.log(file);
     if (file && file.type === 'application/pdf') {
@@ -267,7 +262,7 @@ const Chatbot: React.FC<Props> = () => {
     <Main meta={<Meta title="Chatbot" description="Chatbot" />}>
       <ChatbotWrapper className="flex items-center justify-center overflow-hidden">
         <Paper
-          style={{ maxWidth: '50%', minHeight: '500px', borderRadius: '30px' }}
+          style={{ width: '845px', height: '520px', borderRadius: '30px' }}
           elevation={8}
           className="flex flex-row overflow-auto bg-white _chat_bot_wrapper"
         >
