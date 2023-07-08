@@ -115,7 +115,7 @@ const Chatbot = () => {
     try {
       const response = await fetch('http://localhost:8080/api/v1/autocomplete/suggestions?prefix=what&vertical=FW');
       // eslint-disable-next-line no-underscore-dangle, @typescript-eslint/naming-convention
-      const _RES_OBJ: any = {
+      let _RES_OBJ: any = {
         id: Date.now(),
         role: 'BOT',
         type: 'suggestion',
@@ -221,9 +221,9 @@ const Chatbot = () => {
                             <ul>
                               {question &&
                                 question.map((_qus: any) => {
-                                  const { msg } = _qus || {};
+                                  const { msg, id } = _qus || {};
                                   return (
-                                    <li key={_qus.id} className="_q_check_list flex cursor-pointer hover:bg-slate-400" onClick={() => handleSuggestionClick(msg)}>
+                                    <li key={id} className="_q_check_list flex hover:bg-slate-400 cursor-pointer" onClick={() => handleSuggestionClick(msg)}>
                                       {msg}
                                     </li>
                                   );
@@ -233,16 +233,17 @@ const Chatbot = () => {
                           </div>
                         </div>
                       );
-                    }
-                    return (
-                      <div key={mes.id} className={`_r_chat flex flex-row gap-2 ${role === 'Customer' ? 'Customer flex-row-reverse' : 'BOT'}`}>
-                        <div className="_prof flex flex-col items-center justify-center rounded-full bg-slate-400">s</div>
-                        <div className="_conv relative flex flex-1 flex-col rounded-md p-2 font-normal">
-                          {msg}
-                          <div className="_arrow" />
+                    } else {
+                      return (
+                        <div key={mes.id} className={`_r_chat flex flex-row gap-2 ${role === 'Customer' ? 'Customer flex-row-reverse' : 'BOT'}`}>
+                          <div className="_prof flex flex-col items-center justify-center rounded-full bg-slate-400">s</div>
+                          <div className="_conv relative flex flex-1 flex-col rounded-md p-2 font-normal">
+                            {msg}
+                            <div className="_arrow" />
+                          </div>
                         </div>
-                      </div>
-                    );
+                      );
+                    }
                   })}
                 </div>
                 <div className="flex items-center gap-5 py-2">
