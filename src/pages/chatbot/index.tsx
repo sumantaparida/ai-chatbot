@@ -2,7 +2,7 @@ import UploadFileIcon from '@mui/icons-material/UploadFile';
 import SendIcon from '@mui/icons-material/Send';
 import HelpSharpIcon from '@mui/icons-material/HelpSharp';
 import Paper from '@mui/material/Paper';
-import { CircularProgress } from '@mui/material';
+// import { CircularProgress } from '@mui/material';
 import Image from 'next/image';
 import Link from 'next/link';
 import type { ChangeEvent } from 'react';
@@ -20,7 +20,9 @@ interface Message {
   role: string;
   msg: string | object; // Update the type to accept either a string or an object
   type?: string;
+  vertical?: string;
   question?: [];
+  getquotes?: [];
 }
 
 interface Getquotes {
@@ -38,17 +40,17 @@ interface Suggestions {
   question: string;
   vertical: string;
 }
+
 interface Props {}
 
 const Chatbot: React.FC<Props> = () => {
   const [message, setMessage] = useState('');
   const [uploadedFileId, setUploadedFileId] = useState(null);
   const [vertical, setVertical] = useState('COMMON');
-  const [dotCount, setDotCount] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   // const [placement, setPlacement] = useState<PopperPlacementType>();
   const [chatMessages, setChatMessages] = useState<Message[]>([]);
-  const [getQuote, setQuote] = useState<Getquotes[]>([]);
+  // const [getQuote, setQuote] = useState<Getquotes[]>([]);
 
   const scrollToBottom = () => {
     const chatWindow = document.getElementsByClassName('_c_content')[0];
@@ -108,7 +110,7 @@ const Chatbot: React.FC<Props> = () => {
   const _chatWithfileID = async (mes?: string, suggestion?: boolean) => {
     const data = {
       fileId: getUrlParam('fileIds') || uploadedFileId || '',
-      question: mes || message || "give me insurer's name",
+      question: mes || message,
       docType: 'POLICY_DOCUMENT',
       suggestion,
     };
@@ -124,13 +126,14 @@ const Chatbot: React.FC<Props> = () => {
       if (response.ok) {
         // POST request successful
         const responseData = await response.json();
-        const { question, answer, vertical } = responseData || {};
+        const { answer, vertical } = responseData || {};
         // Process the response data
-        console.log('responseData', question, answer);
+        console.log('responseData', responseData);
         const _msg_obj_res: Message = {
           id: Date.now(),
           role: 'BOT',
-          msg: answer || '',
+          msg: answer.answer || '',
+          vertical: vertical,
         };
         setChatMessages(prevMessages => [...prevMessages, _msg_obj_res]);
 
@@ -145,7 +148,7 @@ const Chatbot: React.FC<Props> = () => {
   };
   const _suggestions = async () => {
     try {
-      const response = await fetch(`http://localhost:8080/api/v1/autocomplete/suggestions?prefix=what&vertical=${vertical}`);
+      const response = await fetch(`http://localhost:8080/api/v1/autocomplete/suggestions?vertical=${vertical}`);
       let _RES_OBJ: any = {
         id: Date.now(),
         role: 'Customer',
@@ -154,9 +157,8 @@ const Chatbot: React.FC<Props> = () => {
       };
       let _QUES: any = [];
       if (response.ok) {
-        // POST request successful
         const responseData = await response.json();
-        if (responseData) {
+        if (responseData.length >= 1) {
           _QUES = responseData.map((_ele: Suggestions) => ({
             id: Date.now(),
             msg: _ele.question || '',
@@ -174,37 +176,37 @@ const Chatbot: React.FC<Props> = () => {
   const _get_quotes = async () => {
     try {
       const response = await fetch('http://localhost:8080/api/v1/autocomplete/getQuotes');
+      let _RES_OBJ: any = {
+        id: Date.now(),
+        role: 'Getquotes',
+        type: 'Getquotes',
+        getquotes: [],
+      };
+      let _QUES: any = [];
       if (response.ok) {
         const responseData = await response.json();
-        setQuote(responseData);
-        // setChatMessages(prevMessages => [...prevMessages, _msg_obj_res]);
-        // setQuote(prevMessages => [...prevMessages, responseData]);
-        // console.log('getQuote', getQuote);
+        _QUES = responseData.map((_ele: Getquotes) => ({
+          id: Date.now(),
+          insurer: _ele.insurer || '',
+          premium: _ele.premium,
+          cashless: _ele.cashless,
+          cover_amount: _ele.cover_amount,
+          logo: _ele.logo,
+          ncb: _ele.ncb,
+          paymentLink: _ele.paymentLink,
+        }));
+
+        _RES_OBJ.getquotes = _QUES;
+        setChatMessages(prevMessages => [...prevMessages, ...[_RES_OBJ]]);
       }
     } catch (error) {}
   };
 
   useEffect(() => {
     loadChatHistory();
-    // const interval = setInterval(() => {
-    //   setDotCount(prevCount => (prevCount + 1) % 4);
-    // }, 300);
-
-    // return () => {
-    //   clearInterval(interval);
-    // };
   }, []);
 
   useEffect(scrollToBottom, [chatMessages]);
-
-  const dots = '.'.repeat(dotCount);
-
-  // const handleClick = (newPlacement: PopperPlacementType) => (event: React.MouseEvent<HTMLDivElement>) => {
-  //   setAnchorEl(event.currentTarget);
-  //   setOpen(prev => placement !== newPlacement || !prev);
-  //   setPlacement(newPlacement);
-  //   scrollToBottom();
-  // };
 
   const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
     const _in_str = event.target.value;
@@ -219,7 +221,7 @@ const Chatbot: React.FC<Props> = () => {
         role: 'Customer',
         msg: message || '',
       };
-      if (getUrlParam('fileIds') || uploadedFileId) {
+      if ((message !== 'quote' && getUrlParam('fileIds')) || uploadedFileId) {
         _chatWithfileID();
       }
       if (message === 'FW') {
@@ -251,9 +253,10 @@ const Chatbot: React.FC<Props> = () => {
       })
         .then(response => response.json())
         .then(data => {
+          const { fileId } = data || {};
           // Handle the response from the server
-          console.log('Upload successful:', data.processInfo.pid);
-          setUploadedFileId(data.processInfo.pid);
+          console.log('Upload successful:', fileId);
+          setUploadedFileId(fileId);
           setIsLoading(false);
           _suggestions();
         })
@@ -278,7 +281,7 @@ const Chatbot: React.FC<Props> = () => {
     }
     // appendMessage(); // Call the appendMessage function to add the message to chatMessages
   };
-  console.log(`Chatbot`, getQuote);
+  console.log(`Chatbot`, chatMessages);
   return (
     <Main meta={<Meta title="Chatbot" description="Chatbot" />}>
       <ChatbotWrapper className="flex items-center justify-center overflow-hidden">
@@ -289,7 +292,7 @@ const Chatbot: React.FC<Props> = () => {
         >
           <div className="flex flex-col p-5 text-black" style={{ flex: '70%', width: '70%' }}>
             <div className="_chat_bot_content flex flex-col">
-              <div className="_c_header flex flex-col bg-white text-green-950 font-bold">Renewal</div>
+              <div className="_c_header flex flex-col bg-white text-green-950 font-bold" />
               <div className="_c_content relative flex flex-1 flex-col gap-2 overflow-auto">
                 {isLoading && (
                   <div
@@ -301,13 +304,77 @@ const Chatbot: React.FC<Props> = () => {
                       height: '100%',
                     }}
                   >
-                    <CircularProgress style={{ color: 'green' }} />
-                    <p style={{ marginTop: '10px' }}>Analyzing{dots}</p>
+                    {/* <CircularProgress style={{ color: 'green' }} /> */}
+                    <p style={{ marginTop: '10px' }}>
+                      Analyzing{' '}
+                      <span>
+                        {' '}
+                        <svg xmlns="http://www.w3.org/2000/svg" width="25" height="8" viewBox="-5 0 267 50">
+                          <g data-name="Group 62" transform="translate(-1882 -1344)">
+                            <circle cx="26.5" cy="26.5" r="26.5" transform="rotate(180 1065 698.5)">
+                              <animate
+                                attributeName="r"
+                                begin="0s"
+                                calcMode="linear"
+                                dur="0.8s"
+                                from="15"
+                                repeatCount="indefinite"
+                                to="15"
+                                values="15;18.5;21;26.5;15"
+                              />
+                            </circle>
+                            <circle cx="21" cy="21" r="21" transform="rotate(180 1030.5 695.5)">
+                              <animate
+                                attributeName="r"
+                                begin="0s"
+                                calcMode="linear"
+                                dur="0.8s"
+                                from="18.5"
+                                repeatCount="indefinite"
+                                to="18.5"
+                                values="18.5;15;21;26.5;18.5"
+                              />
+                            </circle>
+                            <circle cx="18.5" cy="18.5" r="18.5" transform="rotate(180 1000 694.5)">
+                              <animate
+                                attributeName="r"
+                                begin="0s"
+                                calcMode="linear"
+                                dur="0.8s"
+                                from="21"
+                                repeatCount="indefinite"
+                                to="21"
+                                values="21;18.5;15;26.5;21"
+                              />
+                            </circle>
+                            <circle cx="15" cy="15" r="15" transform="rotate(180 965 692.5)">
+                              <animate
+                                attributeName="r"
+                                begin="0s"
+                                calcMode="linear"
+                                dur="0.8s"
+                                from="26.5"
+                                repeatCount="indefinite"
+                                to="26.5"
+                                values="26.5;21;18.5;15;26.5"
+                              />
+                            </circle>
+                          </g>
+                        </svg>
+                      </span>
+                    </p>
                   </div>
                 )}
                 {chatMessages.map(mes => {
-                  const { msg, role, type, question, id }: { msg: any; role: string; type?: string; question?: []; id: number | string } = mes || {};
-                  if (type === 'suggestion') {
+                  const {
+                    msg,
+                    role,
+                    type,
+                    question,
+                    id,
+                    getquotes,
+                  }: { msg: any; role: string; type?: string; question?: []; id: number | string; getquotes?: [] } = mes || {};
+                  if (type === 'suggestion' && question) {
                     return (
                       <div key={id} className={`_r_chat flex flex-row gap-2 ${role === 'Customer' ? 'Customer flex-row-reverse' : 'BOT'}`}>
                         <div className="_s_conv relative flex flex-1 flex-col rounded-md font-normal justify-center">
@@ -332,6 +399,55 @@ const Chatbot: React.FC<Props> = () => {
                         </div>
                       </div>
                     );
+                  } else if (type === 'Getquotes') {
+                    return (
+                      <div className="flex flex-col _carousel overflow-hidden">
+                        <div className="flex flex-row gap-3 overflow-auto m-2">
+                          {getquotes &&
+                            getquotes.map(_res => {
+                              const { insurer, premium, cashless, ncb, cover_amount, logo, paymentLink } = _res || {};
+                              console.log('_res', _res);
+                              return (
+                                <div key={insurer} className="flex flex-col _c_box bg-gray-100 hover:bg-gray-200 cursor-pointer">
+                                  <div className="flex flex-col gap-2">
+                                    <div className="flex flex-col items-center justify-center _img_box">
+                                      <Image src={logo} width={100} height={50} alt="" />
+                                    </div>
+                                    <div className="flex flex-col items-start _data_box">
+                                      <div className="flex flex-col pl-1 pr-1 pb-1">
+                                        <p className="flex flex-row gap-1">
+                                          <span>Premium:</span>
+                                          <span>{premium}</span>
+                                        </p>
+                                        <p className="flex flex-row gap-1">
+                                          <span>Cashless:</span>
+                                          <span>{cashless ? 'Yes' : 'No'}</span>
+                                        </p>
+                                        <p className="flex flex-row gap-1">
+                                          <span>NCB:</span>
+                                          <span>{ncb}</span>
+                                        </p>
+                                        <p className="flex flex-row gap-1">
+                                          <span>Amount:</span>
+                                          <span>{cover_amount}</span>
+                                        </p>
+                                      </div>
+                                      <Link
+                                        className="bg-green-700 text-white hover:bg-green-800"
+                                        href={paymentLink || '/'}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                      >
+                                        Buy
+                                      </Link>
+                                    </div>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                        </div>
+                      </div>
+                    );
                   } else {
                     return (
                       <div key={mes.id} className={`_r_chat flex flex-row gap-2 ${role === 'Customer' ? 'Customer flex-row-reverse' : 'BOT'}`}>
@@ -346,49 +462,6 @@ const Chatbot: React.FC<Props> = () => {
                     );
                   }
                 })}
-                {getQuote.length >= 1 ? (
-                  <div className="flex flex-col _carousel overflow-hidden">
-                    <div className="flex flex-row gap-3 overflow-auto m-2">
-                      {getQuote &&
-                        getQuote.map(_res => {
-                          const { insurer, premium, cashless, ncb, cover_amount, logo, paymentLink } = _res || {};
-                          console.log('_res', _res);
-                          return (
-                            <div key={insurer} className="flex flex-col _c_box bg-gray-100 hover:bg-gray-200 cursor-pointer">
-                              <div className="flex flex-col gap-2">
-                                <div className="flex flex-col items-center justify-center _img_box">
-                                  <Image src={logo} width={100} height={50} alt="" />
-                                </div>
-                                <div className="flex flex-col items-start _data_box">
-                                  <div className="flex flex-col pl-1 pr-1 pb-1">
-                                    <p className="flex flex-row gap-1">
-                                      <span>Premium:</span>
-                                      <span>{premium}</span>
-                                    </p>
-                                    <p className="flex flex-row gap-1">
-                                      <span>Cashless:</span>
-                                      <span>{cashless ? 'Yes' : 'No'}</span>
-                                    </p>
-                                    <p className="flex flex-row gap-1">
-                                      <span>NCB:</span>
-                                      <span>{ncb}</span>
-                                    </p>
-                                    <p className="flex flex-row gap-1">
-                                      <span>Amount:</span>
-                                      <span>{cover_amount}</span>
-                                    </p>
-                                  </div>
-                                  <Link className="bg-green-700 text-white hover:bg-green-800" href={paymentLink} target="_blank" rel="noopener noreferrer">
-                                    Buy
-                                  </Link>
-                                </div>
-                              </div>
-                            </div>
-                          );
-                        })}
-                    </div>
-                  </div>
-                ) : null}
                 {/* <div ref={messagesEndRef} /> */}
               </div>
               <div className="flex items-center flex-row justify-center p-2 bg-gray-300 mt-3">
