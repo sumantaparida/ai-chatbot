@@ -1,7 +1,9 @@
 // import Fade from '@mui/material/Fade';
-import Paper from '@mui/material/Paper';
 // import type { PopperPlacementType } from '@mui/material/Popper';
-import HelpSharpIcon from '@mui/icons-material/HelpSharp';
+import UploadFileIcon from '@mui/icons-material/UploadFile';
+import SendIcon from '@mui/icons-material/Send';
+import Paper from '@mui/material/Paper';
+import { color } from '@mui/system';
 // import Popper from '@mui/material/Popper';
 import Image from 'next/image';
 import type { ChangeEvent } from 'react';
@@ -14,7 +16,6 @@ import _bIcon from '@/public/icons/suraj.jpeg';
 import { Main } from '@/templates/Main';
 
 import ChatbotWrapper from './style';
-import { color } from '@mui/system';
 
 interface Message {
   id: number;
