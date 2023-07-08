@@ -35,6 +35,42 @@ const ChatbotWrapper = styled.section`
     height: 55px;
     box-shadow: 0px 2px 4px -1px rgba(0, 0, 0, 0.2), 0px 4px 5px 0px rgba(0, 0, 0, 0.14), 0px 1px 10px 0px rgba(0, 0, 0, 0.12);
   }
+
+  ._carousel {
+    min-height: 190px;
+    ._c_box {
+      border: solid 1px #15803d;
+      max-width: 170px;
+      border-radius: 5px;
+      box-shadow: 0px 2px 4px -1px rgba(0, 0, 0, 0.2), 0px 4px 5px 0px rgba(0, 0, 0, 0.14), 0px 1px 10px 0px rgba(0, 0, 0, 0.12);
+      ._img_box {
+        border-bottom: solid 1px #a0aec0;
+        height: 50px;
+        img {
+          height: 100%;
+        }
+      }
+      ._data_box {
+        font-size: 14px;
+        p {
+          width: 100%;
+          span {
+            display: flex;
+            flex: 1;
+            &:last-child {
+              color: #3182ce;
+              font-weight: bold;
+            }
+          }
+        }
+        a {
+          width: 100%;
+          padding: 3px;
+          text-align: center;
+        }
+      }
+    }
+  }
 `;
 
 export default ChatbotWrapper;
