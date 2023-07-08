@@ -2,6 +2,7 @@ import UploadFileIcon from '@mui/icons-material/UploadFile';
 import SendIcon from '@mui/icons-material/Send';
 import HelpSharpIcon from '@mui/icons-material/HelpSharp';
 import Paper from '@mui/material/Paper';
+import { CircularProgress } from '@mui/material';
 import Image from 'next/image';
 import Link from 'next/link';
 import type { ChangeEvent } from 'react';
@@ -41,6 +42,9 @@ interface Props {}
 const Chatbot: React.FC<Props> = () => {
   const [message, setMessage] = useState('');
   const [uploadedFileId, setUploadedFileId] = useState(null);
+  const [vertical, setVertical] = useState('common');
+  const [dotCount, setDotCount] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
   // const [placement, setPlacement] = useState<PopperPlacementType>();
   const [chatMessages, setChatMessages] = useState<Message[]>([]);
   const [getQuote, setQuote] = useState<Getquotes[]>([]);
@@ -119,7 +123,7 @@ const Chatbot: React.FC<Props> = () => {
       if (response.ok) {
         // POST request successful
         const responseData = await response.json();
-        const { question, answer } = responseData || {};
+        const { question, answer, vertical } = responseData || {};
         // Process the response data
         console.log('responseData', question, answer);
         const _msg_obj_res: Message = {
@@ -128,42 +132,19 @@ const Chatbot: React.FC<Props> = () => {
           msg: answer || '',
         };
         setChatMessages(prevMessages => [...prevMessages, _msg_obj_res]);
+
+        if (vertical) {
+          setVertical(vertical);
+        } else {
+          setVertical('common');
+        }
       } else {
       }
     } catch (error) {}
   };
-
-  const handleFileUpload = (event: any) => {
-    const file = event.target.files[0]; // Get the uploaded file
-    console.log(file);
-    if (file && file.type === 'application/pdf') {
-      console.log('hi');
-      const formData = new FormData();
-      formData.append('file', file); // Append the file to the FormData object
-      console.log(formData);
-      // Make a POST request to the upload URL
-      fetch('http://localhost:8080/api/v1/document', {
-        method: 'POST',
-        body: formData,
-      })
-        .then(response => response.json())
-        .then(data => {
-          // Handle the response from the server
-          console.log('Upload successful:', data.processInfo.pid);
-          setUploadedFileId(data.processInfo.pid);
-        })
-        .catch(error => {
-          // Handle any error that occurred during the upload
-          console.error('Upload failed:', error);
-        });
-    } else {
-      console.log('Invalid file format. Please select a PDF file.');
-    }
-  };
-
   const _suggestions = async () => {
     try {
-      const response = await fetch('http://localhost:8080/api/v1/autocomplete/suggestions?prefix=what&vertical=FW');
+      const response = await fetch(`http://localhost:8080/api/v1/autocomplete/suggestions?prefix=what&vertical=${vertical}`);
       let _RES_OBJ: any = {
         id: Date.now(),
         role: 'Customer',
@@ -191,7 +172,7 @@ const Chatbot: React.FC<Props> = () => {
 
   const _get_quotes = async () => {
     try {
-      const response = await fetch('https://renewals-sumanta.free.beeceptor.com/api/v1/renewal/quotes');
+      const response = await fetch('https://renewals-1.free.beeceptor.com/api/v1/renewal/quotes');
       if (response.ok) {
         const responseData = await response.json();
         setQuote(responseData);
@@ -204,9 +185,18 @@ const Chatbot: React.FC<Props> = () => {
 
   useEffect(() => {
     loadChatHistory();
+    const interval = setInterval(() => {
+      setDotCount((prevCount) => (prevCount + 1) % 4);
+    }, 300);
+
+    return () => {
+      clearInterval(interval);
+    };
   }, []);
 
   useEffect(scrollToBottom, [chatMessages]);
+
+  const dots = '.'.repeat(dotCount);
 
   // const handleClick = (newPlacement: PopperPlacementType) => (event: React.MouseEvent<HTMLDivElement>) => {
   //   setAnchorEl(event.currentTarget);
@@ -244,6 +234,36 @@ const Chatbot: React.FC<Props> = () => {
       scrollToBottom();
     }
   };
+  const handleFileUpload = (event: any) => {
+    const file = event.target.files[0]; // Get the uploaded file
+    console.log(file);
+    if (file && file.type === 'application/pdf') {
+      setIsLoading(true);
+      console.log('hi');
+      const formData = new FormData();
+      formData.append('file', file); // Append the file to the FormData object
+      console.log(formData);
+      // Make a POST request to the upload URL
+      fetch('http://localhost:8080/api/v1/document', {
+        method: 'POST',
+        body: formData,
+      })
+        .then(response => response.json())
+        .then(data => {
+          // Handle the response from the server
+          console.log('Upload successful:', data.processInfo.pid);
+          setUploadedFileId(data.processInfo.pid);
+          setIsLoading(false);
+          _suggestions();
+        })
+        .catch(error => {
+          // Handle any error that occurred during the upload
+          console.error('Upload failed:', error);
+        });
+    } else {
+      console.log('Invalid file format. Please select a PDF file.');
+    }
+  };
   const handleSuggestionClick = (mes: any) => {
     // setMessage(mes); // Set the clicked message as the input value
     const _msg_obj_res: Message = {
@@ -270,6 +290,20 @@ const Chatbot: React.FC<Props> = () => {
             <div className="_chat_bot_content flex flex-col">
               <div className="_c_header flex flex-col bg-white text-green-950 font-bold">Renewal</div>
               <div className="_c_content relative flex flex-1 flex-col gap-2 overflow-auto">
+                {isLoading && (
+                  <div
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      height: '100%',
+                    }}
+                  >
+                    <CircularProgress style={{ color: 'green' }} />
+                    <p style={{ marginTop: '10px' }}>Analyzing{dots}</p>
+                  </div>
+                )}
                 {chatMessages.map(mes => {
                   const { msg, role, type, question, id }: { msg: any; role: string; type?: string; question?: []; id: number | string } = mes || {};
                   if (type === 'suggestion') {
@@ -316,7 +350,7 @@ const Chatbot: React.FC<Props> = () => {
                     <div className="flex flex-row gap-3 overflow-auto m-2">
                       {getQuote &&
                         getQuote.map(_res => {
-                          const { insurer, premium, cashless, ncb, cover_amount, logo } = _res || {};
+                          const { insurer, premium, cashless, ncb, cover_amount, logo, paymentLink } = _res || {};
                           console.log('_res', _res);
                           return (
                             <div key={insurer} className="flex flex-col _c_box bg-gray-100 hover:bg-gray-200 cursor-pointer">
@@ -343,9 +377,9 @@ const Chatbot: React.FC<Props> = () => {
                                       <span>{cover_amount}</span>
                                     </p>
                                   </div>
-                                  <Link className="bg-green-700 text-white hover:bg-green-800" href="/">
+                                  <a className="bg-green-700 text-white hover:bg-green-800" href={paymentLink} target="_blank" rel="noopener noreferrer">
                                     Buy
-                                  </Link>
+                                  </a>
                                 </div>
                               </div>
                             </div>
