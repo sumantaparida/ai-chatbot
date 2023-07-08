@@ -14,11 +14,6 @@ import { Main } from '@/templates/Main';
 
 import ChatbotWrapper from './style';
 
-// type Message = {
-//   id: number;
-//   role: string;
-//   msg: string;
-// };
 interface Message {
   id: number;
   role: string;
@@ -35,11 +30,6 @@ interface Suggestions {
 interface Props {}
 
 const Chatbot: React.FC<Props> = () => {
-  // const defaultMessage = {
-  //   id: Date.now(),
-  //   role: 'BOT',
-  //   msg: 'Default msg',
-  // };
   const [anchorEl, setAnchorEl] = useState<HTMLDivElement | null>(null);
   const [open, setOpen] = useState(false);
   const [message, setMessage] = useState('');
@@ -101,7 +91,6 @@ const Chatbot: React.FC<Props> = () => {
         const { question, answer } = responseData || {};
         // Process the response data
         console.log('responseData', question, answer);
-        // eslint-disable-next-line no-underscore-dangle, @typescript-eslint/naming-convention
         const _msg_obj_res: Message = {
           id: Date.now(),
           role: 'BOT',
@@ -109,16 +98,10 @@ const Chatbot: React.FC<Props> = () => {
         };
         setChatMessages(prevMessages => [...prevMessages, _msg_obj_res]);
       } else {
-        // POST request failed
-        // Handle the error
       }
-    } catch (error) {
-      // Error occurred during the POST request
-      // Handle the error
-    }
+    } catch (error) {}
   };
 
-  // eslint-disable-next-line @typescript-eslint/naming-convention, no-underscore-dangle
   const _suggestions = async () => {
     try {
       const response = await fetch('http://localhost:8080/api/v1/autocomplete/suggestions?prefix=what&vertical=FW');
@@ -141,23 +124,14 @@ const Chatbot: React.FC<Props> = () => {
             category: _ele.category,
           }));
         }
-        // Process the response data
         _RES_OBJ.question = _QUES;
-        // console.log('responseData', _RES_OBJ);
         setChatMessages(prevMessages => [...prevMessages, ...[_RES_OBJ]]);
-        // console.log('FY', chatMessages);
       } else {
-        // POST request failed
-        // Handle the error
       }
-    } catch (error) {
-      // Error occurred during the POST request
-      // Handle the error
-    }
+    } catch (error) {}
   };
 
   useEffect(() => {
-    // Fetch the API response
     loadChatHistory();
   }, []);
 
@@ -169,7 +143,6 @@ const Chatbot: React.FC<Props> = () => {
   };
 
   const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
-    // eslint-disable-next-line @typescript-eslint/naming-convention, no-underscore-dangle
     const _in_str = event.target.value;
     setMessage(_in_str);
   };
@@ -178,7 +151,6 @@ const Chatbot: React.FC<Props> = () => {
     // event.preventDefault();
     console.log(message);
     if (message) {
-      // eslint-disable-next-line no-underscore-dangle, @typescript-eslint/naming-convention
       const _msg_obj: Message = {
         id: Date.now(),
         role: 'Customer',
@@ -220,9 +192,7 @@ const Chatbot: React.FC<Props> = () => {
                     const { msg, role, type, question, id }: { msg: any; role: string; type?: string; question?: []; id: number | string } = mes || {};
                     if (type === 'suggestion') {
                       return (
-                        // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-i[]nteractions
                         <div key={id} className={`_r_chat flex flex-row gap-2 ${role === 'Customer' ? 'Customer flex-row-reverse' : 'BOT'}`}>
-                          {/* <div className="_prof flex flex-col items-center justify-center rounded-full bg-green-950 text-green-50">s</div> */}
                           <div className="_s_conv relative flex flex-1 flex-col rounded-md font-normal justify-center">
                             <p className="_q_check_list">
                               <span className="_q_mark">
