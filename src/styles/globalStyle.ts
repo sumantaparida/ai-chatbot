@@ -2,8 +2,29 @@ import { createGlobalStyle } from 'styled-components';
 
 const GlobalStyle = createGlobalStyle`
   ._chat_bot_wrapper {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    ._chat_bot_content {
+      width: 100%;
+      max-width: 500px;
+      height: 580px !important;
+      background-color: #fff !important;
+      color: #000 !important;
+    }
     ._c_header {
-      color: #fff
+      color: #fff;
+      bdisplay: flex;
+      flex-direction: column;
+      background-color: #292929;
+      padding: 18px;
+      border-radius: 8px;
     }
     ._c_content {
       & > div {
@@ -33,9 +54,16 @@ const GlobalStyle = createGlobalStyle`
           position: absolute;
         }
         ._prof {
-          width: 40px;
-          height: 40px;
-          border: 1px solid #ced9e1;
+          display: flex;
+          position: relative;
+          height: 100%;
+            display: grid;
+            place-content: center;
+            padding: 0.5em;
+            width: 2.3em;
+            height: 2.3em;
+            border-radius: 50%;
+            background: #6D5D6E;
         }
         ._conv {
           border: solid 1px #dedede;
@@ -48,12 +76,6 @@ const GlobalStyle = createGlobalStyle`
     ._input_box {
       border: solid 1px red
     }
-  }
-  ._chat_bot_content {
-    height: 480px !important;
-    width: 320px;
-    background-color: #fff !important;
-    color: #000 !important;
   }
 `;
 

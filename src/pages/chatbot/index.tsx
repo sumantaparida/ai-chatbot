@@ -1,3 +1,4 @@
+import SendIcon from '@mui/icons-material/Send';
 import Fade from '@mui/material/Fade';
 import Paper from '@mui/material/Paper';
 import type { PopperPlacementType } from '@mui/material/Popper';
@@ -193,7 +194,7 @@ const Chatbot = () => {
         <Popper open={open} anchorEl={anchorEl} placement={placement} transition className="_chat_bot_wrapper">
           {({ TransitionProps }) => (
             <Fade {...TransitionProps} timeout={350}>
-              <Paper className="_chat_bot_content flex flex-col" elevation={4}>
+              <Paper className="_chat_bot_content flex flex-col" elevation={4} sx={{ borderRadius: '25px' }}>
                 <div className="_c_header flex flex-col bg-gray-900 p-2">Renewal</div>
                 <div className="_c_content relative flex flex-1 flex-col gap-2 overflow-auto p-2">
                   {chatMessages.map(mes => {
@@ -257,7 +258,7 @@ const Chatbot = () => {
                     className="mr-2 rounded-md bg-gray-700 px-4 py-2 text-white hover:bg-gray-800 focus:outline-none"
                     onClick={appendMessage}
                   >
-                    Send
+                    <SendIcon />
                   </button>
                 </div>
               </Paper>
