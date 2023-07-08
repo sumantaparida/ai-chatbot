@@ -51,11 +51,15 @@ const Chatbot: React.FC<Props> = () => {
     // messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  function getUrlParam(param: any) {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get(param);
+  }
   const loadChatHistory = async () => {
     try {
       let apiUrl = 'http://localhost:8080/api/v1/data';
-      const urlParams = new URLSearchParams(window.location.search);
-      const idParam = urlParams.get('id');
+      const idParam = getUrlParam('fileIds');
+      // const idParam = urlParams.get('id');
       // urlParams.get('id');
 
       if (idParam) {
@@ -93,10 +97,9 @@ const Chatbot: React.FC<Props> = () => {
     }
   };
 
-  // eslint-disable-next-line @typescript-eslint/naming-convention, no-underscore-dangle
   const _chatWithfileID = async (mes?: string, suggestion?: boolean) => {
     const data = {
-      fileId: 'c02d77ef-9be3-472e-86cd-9e0a5b35e599',
+      fileId: getUrlParam('fileIds') || uploadedFileId || '',
       question: mes || message || "give me insurer's name",
       docType: 'POLICY_DOCUMENT',
       suggestion,
@@ -131,9 +134,10 @@ const Chatbot: React.FC<Props> = () => {
     const file = event.target.files[0]; // Get the uploaded file
     console.log(file);
     if (file && file.type === 'application/pdf') {
+      console.log('hi');
       const formData = new FormData();
       formData.append('file', file); // Append the file to the FormData object
-
+      console.log(formData);
       // Make a POST request to the upload URL
       fetch('http://localhost:8080/api/v1/document', {
         method: 'POST',
@@ -142,8 +146,8 @@ const Chatbot: React.FC<Props> = () => {
         .then(response => response.json())
         .then(data => {
           // Handle the response from the server
-          console.log('Upload successful:', data.id);
-          setUploadedFileId(data.id);
+          console.log('Upload successful:', data.processInfo.pid);
+          setUploadedFileId(data.processInfo.pid);
         })
         .catch(error => {
           // Handle any error that occurred during the upload
@@ -209,7 +213,9 @@ const Chatbot: React.FC<Props> = () => {
         role: 'Customer',
         msg: message || '',
       };
-      _chatWithfileID();
+      if (getUrlParam('fileIds') || uploadedFileId) {
+        _chatWithfileID();
+      }
       if (message === 'FW') {
         _suggestions();
       }
@@ -228,7 +234,9 @@ const Chatbot: React.FC<Props> = () => {
       msg: mes || '',
     };
     setChatMessages(prevMessages => [...prevMessages, _msg_obj_res]);
-    _chatWithfileID(mes, true);
+    if (getUrlParam('fileIds') || uploadedFileId) {
+      _chatWithfileID(mes, true);
+    }
     // appendMessage(); // Call the appendMessage function to add the message to chatMessages
   };
   console.log(`Chatbot`, chatMessages);
