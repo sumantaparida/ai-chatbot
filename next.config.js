@@ -17,4 +17,12 @@ module.exports = withBundleAnalyzer({
   compiler: {
     styledComponents: true,
   },
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'd5ng0zjhhq362.cloudfront.net',
+      },
+    ],
+  },
 });

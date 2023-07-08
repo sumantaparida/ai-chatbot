@@ -4,6 +4,7 @@ import Paper from '@mui/material/Paper';
 import HelpSharpIcon from '@mui/icons-material/HelpSharp';
 // import Popper from '@mui/material/Popper';
 import Image from 'next/image';
+import Link from 'next/link';
 import type { ChangeEvent } from 'react';
 import React, { useEffect, useState } from 'react';
 
@@ -23,6 +24,15 @@ interface Message {
   question?: [];
 }
 
+interface Getquotes {
+  insurer: string;
+  premium: string;
+  cashless: string;
+  ncb: string;
+  cover_amount: string;
+  logo: string;
+}
+
 interface Suggestions {
   category: string;
   question: string;
@@ -31,12 +41,9 @@ interface Suggestions {
 interface Props {}
 
 const Chatbot: React.FC<Props> = () => {
-  // const [anchorEl, setAnchorEl] = useState<HTMLDivElement | null>(null);
-  // const [open, setOpen] = useState(false);
   const [message, setMessage] = useState('');
-  // const [placement, setPlacement] = useState<PopperPlacementType>();
   const [chatMessages, setChatMessages] = useState<Message[]>([]);
-  // const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const [getQuote, setQuote] = useState<Getquotes[]>([]);
 
   const scrollToBottom = () => {
     const chatWindow = document.getElementsByClassName('_c_content')[0];
@@ -134,6 +141,19 @@ const Chatbot: React.FC<Props> = () => {
     } catch (error) {}
   };
 
+  const _get_quotes = async () => {
+    try {
+      const response = await fetch('https://renewals-sumanta.free.beeceptor.com/api/v1/renewal/quotes');
+      if (response.ok) {
+        const responseData = await response.json();
+        setQuote(responseData);
+        // setChatMessages(prevMessages => [...prevMessages, _msg_obj_res]);
+        // setQuote(prevMessages => [...prevMessages, responseData]);
+        // console.log('getQuote', getQuote);
+      }
+    } catch (error) {}
+  };
+
   useEffect(() => {
     loadChatHistory();
   }, []);
@@ -154,7 +174,6 @@ const Chatbot: React.FC<Props> = () => {
 
   const appendMessage = async () => {
     // event.preventDefault();
-    console.log(message);
     if (message) {
       const _msg_obj: Message = {
         id: Date.now(),
@@ -164,6 +183,9 @@ const Chatbot: React.FC<Props> = () => {
       _chatWithfileID();
       if (message === 'FW') {
         _suggestions();
+      }
+      if (message === 'quote') {
+        _get_quotes();
       }
       setChatMessages(prevMessages => [...prevMessages, _msg_obj]);
 
@@ -183,7 +205,7 @@ const Chatbot: React.FC<Props> = () => {
     _chatWithfileID(mes, true);
     // appendMessage(); // Call the appendMessage function to add the message to chatMessages
   };
-  console.log(`Chatbot`, chatMessages);
+  console.log(`Chatbot`, getQuote);
   return (
     <Main meta={<Meta title="Chatbot" description="Chatbot" />}>
       <ChatbotWrapper className="flex items-center justify-center overflow-hidden">
@@ -192,7 +214,7 @@ const Chatbot: React.FC<Props> = () => {
           elevation={8}
           className="flex flex-row overflow-auto bg-white _chat_bot_wrapper"
         >
-          <div className="flex flex-col p-5 text-black" style={{ flex: '70%' }}>
+          <div className="flex flex-col p-5 text-black" style={{ flex: '70%', width: '70%' }}>
             <div className="_chat_bot_content flex flex-col">
               <div className="_c_header flex flex-col bg-white text-green-950 font-bold">Renewal</div>
               <div className="_c_content relative flex flex-1 flex-col gap-2 overflow-auto">
@@ -237,6 +259,49 @@ const Chatbot: React.FC<Props> = () => {
                     );
                   }
                 })}
+                {getQuote.length >= 1 ? (
+                  <div className="flex flex-col _carousel overflow-hidden">
+                    <div className="flex flex-row gap-3 overflow-auto m-2">
+                      {getQuote &&
+                        getQuote.map(_res => {
+                          const { insurer, premium, cashless, ncb, cover_amount, logo } = _res || {};
+                          console.log('_res', _res);
+                          return (
+                            <div key={insurer} className="flex flex-col _c_box bg-gray-100 hover:bg-gray-200 cursor-pointer">
+                              <div className="flex flex-col gap-2">
+                                <div className="flex flex-col items-center justify-center _img_box">
+                                  <Image src={logo} width={100} height={50} alt="" />
+                                </div>
+                                <div className="flex flex-col items-start _data_box">
+                                  <div className="flex flex-col pl-1 pr-1 pb-1">
+                                    <p className="flex flex-row gap-1">
+                                      <span>Premium:</span>
+                                      <span>{premium}</span>
+                                    </p>
+                                    <p className="flex flex-row gap-1">
+                                      <span>Cashless:</span>
+                                      <span>{cashless ? 'Yes' : 'No'}</span>
+                                    </p>
+                                    <p className="flex flex-row gap-1">
+                                      <span>NCB:</span>
+                                      <span>{ncb}</span>
+                                    </p>
+                                    <p className="flex flex-row gap-1">
+                                      <span>Amount:</span>
+                                      <span>{cover_amount}</span>
+                                    </p>
+                                  </div>
+                                  <Link className="bg-green-700 text-white hover:bg-green-800" href="/">
+                                    Buy
+                                  </Link>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                    </div>
+                  </div>
+                ) : null}
                 {/* <div ref={messagesEndRef} /> */}
               </div>
               <div className="flex items-center gap-5 pt-2">
@@ -259,7 +324,7 @@ const Chatbot: React.FC<Props> = () => {
               </div>
             </div>
           </div>
-          <div className="flex items-center justify-center bg-green-950" style={{ flex: '30%' }}>
+          <div className="flex items-center justify-center bg-green-950" style={{ flex: '30%', width: '30%' }}>
             <Image src={logoImage} alt="Logo" width={220} height={100} />
           </div>
         </Paper>
