@@ -22,6 +22,7 @@ interface Message {
   role: string;
   msg: string | object; // Update the type to accept either a string or an object
   type?: string;
+  question?: [];
 }
 
 interface Suggestions {
@@ -29,8 +30,6 @@ interface Suggestions {
   question: string;
   vertical: string;
 }
-
-let renderProfile = true;
 
 const Chatbot = () => {
   // const defaultMessage = {
@@ -73,10 +72,10 @@ const Chatbot = () => {
   };
 
   // eslint-disable-next-line @typescript-eslint/naming-convention, no-underscore-dangle
-  const _chatWithfileID = async () => {
+  const _chatWithfileID = async (mes?: string) => {
     const data = {
       fileId: 'c02d77ef-9be3-472e-86cd-9e0a5b35e599',
-      question: message || "give me insurer's name",
+      question: mes || message || "give me insurer's name",
       docType: 'POLICY_DOCUMENT',
     };
     try {
@@ -116,21 +115,29 @@ const Chatbot = () => {
     try {
       const response = await fetch('http://localhost:8080/api/v1/autocomplete/suggestions?prefix=what&vertical=FW');
       // eslint-disable-next-line no-underscore-dangle, @typescript-eslint/naming-convention
-      let _RES_OBJ: any = [];
+      let _RES_OBJ: any = {
+        id: Date.now(),
+        role: 'BOT',
+        type: 'suggestion',
+        question: [],
+      };
+      let _QUES: any = [];
       if (response.ok) {
         // POST request successful
         const responseData = await response.json();
         if (responseData) {
-          _RES_OBJ = responseData.map((_ele: Suggestions) => ({
+          _QUES = responseData.map((_ele: Suggestions) => ({
             id: Date.now(),
-            role: 'BOT',
             msg: _ele.question || '',
-            type: 'suggestion',
+            vertical: _ele.vertical,
+            category: _ele.category,
           }));
         }
         // Process the response data
-        console.log('responseData', _RES_OBJ);
-        setChatMessages(prevMessages => [...prevMessages, ..._RES_OBJ]);
+        _RES_OBJ.question = _QUES;
+        // console.log('responseData', _RES_OBJ);
+        setChatMessages(prevMessages => [...prevMessages, ...[_RES_OBJ]]);
+        // console.log('FY', chatMessages);
       } else {
         // POST request failed
         // Handle the error
@@ -182,9 +189,16 @@ const Chatbot = () => {
     }
   };
   const handleSuggestionClick = (mes: any) => {
-    setMessage(mes); // Set the clicked message as the input value
-    console.log(message);
-    appendMessage(); // Call the appendMessage function to add the message to chatMessages
+    // setMessage(mes); // Set the clicked message as the input value
+    const _msg_obj_res: Message = {
+      id: Date.now(),
+      role: 'Customer',
+      msg: mes || '',
+    };
+    setChatMessages(prevMessages => [...prevMessages, _msg_obj_res]);
+    _chatWithfileID(mes);
+    console.log('Selected Suggestion', mes);
+    // appendMessage(); // Call the appendMessage function to add the message to chatMessages
   };
   console.log(`Chatbot`, chatMessages);
   return (
@@ -197,49 +211,39 @@ const Chatbot = () => {
                 <div className="_c_header flex flex-col bg-gray-900 p-2">Renewal</div>
                 <div className="_c_content relative flex flex-1 flex-col gap-2 overflow-auto p-2">
                   {chatMessages.map(mes => {
-                    const { msg, role, type }: { msg: any; role: string; type?: string } = mes || {};
+                    const { msg, role, type, question, id }: { msg: any; role: string; type?: string; question?: []; id: number | string } = mes || {};
                     if (type === 'suggestion') {
-                      if (renderProfile) {
-                        renderProfile = false;
-                        return (
-                          // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
-                          <div
-                            key={mes.id}
-                            className={`_r_chat flex flex-row gap-2 ${role === 'Customer' ? 'Customer flex-row-reverse' : 'BOT'}`}
-                            onClick={() => handleSuggestionClick(msg)}
-                          >
-                            <div className="_prof flex flex-col items-center justify-center rounded-full bg-slate-400">s</div>
-                            <div className="_conv relative flex flex-1 flex-col rounded-md p-2 font-normal">
-                              {msg}
-                              {/* <div className="_arrow" /> */}
-                            </div>
-                          </div>
-                        );
-                      }
                       return (
-                        // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
-                        <div
-                          key={mes.id}
-                          className={`_r_chat flex flex-row gap-2 ${role === 'Customer' ? 'Customer flex-row-reverse' : 'BOT'}`}
-                          onClick={() => handleSuggestionClick(msg)}
-                        >
-                          <div className="_conv relative ml-12 flex flex-1 flex-col rounded-md p-2 font-normal">
+                        // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-i[]nteractions
+                        <div key={id} className={`_r_chat flex flex-row gap-2 ${role === 'Customer' ? 'Customer flex-row-reverse' : 'BOT'}`}>
+                          <div className="_prof flex flex-col items-center justify-center rounded-full bg-slate-400">s</div>
+                          <div className="_conv relative flex flex-1 flex-col rounded-md p-2 font-normal">
+                            <ul>
+                              {question &&
+                                question.map((_qus: any) => {
+                                  const { msg, id } = _qus || {};
+                                  return (
+                                    <li key={id} className="_q_check_list flex hover:bg-slate-400 cursor-pointer" onClick={() => handleSuggestionClick(msg)}>
+                                      {msg}
+                                    </li>
+                                  );
+                                })}
+                            </ul>
+                            <div className="_arrow" />
+                          </div>
+                        </div>
+                      );
+                    } else {
+                      return (
+                        <div key={mes.id} className={`_r_chat flex flex-row gap-2 ${role === 'Customer' ? 'Customer flex-row-reverse' : 'BOT'}`}>
+                          <div className="_prof flex flex-col items-center justify-center rounded-full bg-slate-400">s</div>
+                          <div className="_conv relative flex flex-1 flex-col rounded-md p-2 font-normal">
                             {msg}
-                            {/* <div className="_arrow" /> */}
+                            <div className="_arrow" />
                           </div>
                         </div>
                       );
                     }
-                    renderProfile = true;
-                    return (
-                      <div key={mes.id} className={`_r_chat flex flex-row gap-2 ${role === 'Customer' ? 'Customer flex-row-reverse' : 'BOT'}`}>
-                        <div className="_prof flex flex-col items-center justify-center rounded-full bg-slate-400">s</div>
-                        <div className="_conv relative flex flex-1 flex-col rounded-md p-2 font-normal">
-                          {msg}
-                          <div className="_arrow" />
-                        </div>
-                      </div>
-                    );
                   })}
                 </div>
                 <div className="flex items-center gap-5 py-2">
