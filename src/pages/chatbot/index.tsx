@@ -1,6 +1,7 @@
 import Fade from '@mui/material/Fade';
 import Paper from '@mui/material/Paper';
 import type { PopperPlacementType } from '@mui/material/Popper';
+import HelpSharpIcon from '@mui/icons-material/HelpSharp';
 import Popper from '@mui/material/Popper';
 import Image from 'next/image';
 import type { ChangeEvent } from 'react';
@@ -124,7 +125,7 @@ const Chatbot: React.FC<Props> = () => {
       // eslint-disable-next-line no-underscore-dangle, @typescript-eslint/naming-convention
       let _RES_OBJ: any = {
         id: Date.now(),
-        role: 'BOT',
+        role: 'Customer',
         type: 'suggestion',
         question: [],
       };
@@ -221,20 +222,26 @@ const Chatbot: React.FC<Props> = () => {
                       return (
                         // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-i[]nteractions
                         <div key={id} className={`_r_chat flex flex-row gap-2 ${role === 'Customer' ? 'Customer flex-row-reverse' : 'BOT'}`}>
-                          <div className="_prof flex flex-col items-center justify-center rounded-full bg-green-950 text-green-50">s</div>
-                          <div className="_conv relative flex flex-1 flex-col rounded-md p-2 font-normal bg-green-700 items-start justify-center">
-                            <ul className="flex flex-col gap-1">
+                          {/* <div className="_prof flex flex-col items-center justify-center rounded-full bg-green-950 text-green-50">s</div> */}
+                          <div className="_s_conv relative flex flex-1 flex-col rounded-md font-normal justify-center">
+                            <p className="_q_check_list">
+                              <span className="_q_mark">
+                                <HelpSharpIcon fontSize="medium" className="text-green-950" />
+                              </span>
                               {question &&
                                 question.map((_qus: any) => {
                                   const { msg, id } = _qus || {};
                                   return (
-                                    <li key={id} className="_q_check_list flex" onClick={() => handleSuggestionClick(msg)}>
-                                      <span className="hover:bg-green-900 bg-green-800 cursor-pointer">{msg}</span>
-                                    </li>
+                                    <span
+                                      key={id}
+                                      className="_q_check_list hover:bg-green-900 bg-green-800 cursor-pointer list"
+                                      onClick={() => handleSuggestionClick(msg)}
+                                    >
+                                      {msg}
+                                    </span>
                                   );
                                 })}
-                            </ul>
-                            <div className="_arrow" />
+                            </p>
                           </div>
                         </div>
                       );

@@ -46,10 +46,23 @@ const GlobalStyle = createGlobalStyle`
           color: #fff;
           box-shadow: 0px 4px 5px #2f2f2f80;
           max-width: 240px;
+        }
+        ._s_conv {
+          font-size: 14px;
+          line-height: 18px;
+          word-break: break-word;
+          color: #fff;
           ._q_check_list {
-            span {
+            text-align: right;
+            ._q_mark {
+              height: 25px;
+              color: #052e16;
+            }
+            span.list {
               padding: 3px 5px;
               border-radius: 5px;
+              margin: 2.5px;
+              line-height: 27px;
             }
           }
         }
@@ -61,7 +74,7 @@ const GlobalStyle = createGlobalStyle`
   }
   ._chat_bot_content {
     height: 480px !important;
-    width: 320px;
+    width: 375px;
     background-color: #fff !important;
     color: #000 !important;
   }
