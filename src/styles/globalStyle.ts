@@ -44,7 +44,7 @@ const GlobalStyle = createGlobalStyle`
           word-break: break-word;
           color: #fff;
           box-shadow: 0px 4px 5px #2f2f2f80;
-          max-width: 240px;
+          max-width: 380px;
         }
         ._s_conv {
           font-size: 14px;
@@ -58,7 +58,7 @@ const GlobalStyle = createGlobalStyle`
               color: #052e16;
             }
             span.list {
-              padding: 3px 5px;
+              padding: 5px 5px;
               border-radius: 5px;
               margin: 2.5px;
               line-height: 27px;
