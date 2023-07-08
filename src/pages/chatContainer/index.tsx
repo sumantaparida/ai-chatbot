@@ -1,22 +1,16 @@
+/* eslint-disable tailwindcss/no-custom-classname */
 import Fade from '@mui/material/Fade';
 import Paper from '@mui/material/Paper';
 import type { PopperPlacementType } from '@mui/material/Popper';
 import Popper from '@mui/material/Popper';
 import Image from 'next/image';
 import type { ChangeEvent } from 'react';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
-import { Meta } from '@/layouts/Meta';
-import bIcon from '@/public/icons/bot.svg';
-import { Main } from '@/templates/Main';
+import logoImage from '@/public/assets/images/logo_turtlemint.svg';
 
-import ChatbotWrapper from './style';
+import ContainerWrapper from './style';
 
-// type Message = {
-//   id: number;
-//   role: string;
-//   msg: string;
-// };
 interface Message {
   id: number;
   role: string;
@@ -31,18 +25,12 @@ interface Suggestions {
   vertical: string;
 }
 
-const Chatbot = () => {
-  // const defaultMessage = {
-  //   id: Date.now(),
-  //   role: 'BOT',
-  //   msg: 'Default msg',
-  // };
+const Container = () => {
   const [anchorEl, setAnchorEl] = useState<HTMLDivElement | null>(null);
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(true);
   const [message, setMessage] = useState('');
   const [placement, setPlacement] = useState<PopperPlacementType>();
   const [chatMessages, setChatMessages] = useState<Message[]>([]);
-  const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   const scrollToBottom = () => {
     const chatWindow = document.getElementsByClassName('_c_content')[0];
@@ -154,13 +142,6 @@ const Chatbot = () => {
     // scrollToBottom();
   }, []);
 
-  const handleClick = (newPlacement: PopperPlacementType) => (event: React.MouseEvent<HTMLDivElement>) => {
-    setAnchorEl(event.currentTarget);
-    setOpen(prev => placement !== newPlacement || !prev);
-    setPlacement(newPlacement);
-    scrollToBottom();
-  };
-
   const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
     // eslint-disable-next-line @typescript-eslint/naming-convention, no-underscore-dangle
     const _in_str = event.target.value;
@@ -202,11 +183,14 @@ const Chatbot = () => {
   };
   console.log(`Chatbot`, chatMessages);
   return (
-    <Main meta={<Meta title="Chatbot" description="Chatbot" />}>
-      <ChatbotWrapper className="flex flex-row">
-        <Popper open={open} anchorEl={anchorEl} placement={placement} transition className="_chat_bot_wrapper">
-          {({ TransitionProps }) => (
-            <Fade {...TransitionProps} timeout={350}>
+    <ContainerWrapper className="bg">
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
+        <Paper
+          style={{ width: '65%', backgroundColor: 'white', height: '65vh', display: 'flex', flexDirection: 'row', borderRadius: '30px', overflow: 'hidden' }}
+          elevation={8}
+        >
+          <div className="flex flex-col p-5 text-black" style={{ flex: '70%' }}>
+            <div className="_chat_bot_wrapper">
               <Paper className="_chat_bot_content flex flex-col" elevation={4}>
                 <div className="_c_header flex flex-col bg-gray-900 p-2">Renewal</div>
                 <div className="_c_content relative flex flex-1 flex-col gap-2 overflow-auto p-2">
@@ -214,20 +198,20 @@ const Chatbot = () => {
                     const { msg, role, type, question, id }: { msg: any; role: string; type?: string; question?: []; id: number | string } = mes || {};
                     if (type === 'suggestion') {
                       return (
-                        // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-i[]nteractions
                         <div key={id} className={`_r_chat flex flex-row gap-2 ${role === 'Customer' ? 'Customer flex-row-reverse' : 'BOT'}`}>
                           <div className="_prof flex flex-col items-center justify-center rounded-full bg-slate-400">s</div>
                           <div className="_conv relative flex flex-1 flex-col rounded-md p-2 font-normal">
                             <ul>
                               {question &&
-                                question.map((_qus: any) => {
-                                  const { msg } = _qus || {};
-                                  return (
-                                    <li key={_qus.id} className="_q_check_list flex cursor-pointer hover:bg-slate-400" onClick={() => handleSuggestionClick(msg)}>
-                                      {msg}
-                                    </li>
-                                  );
-                                })}
+                                question.map((_qus: any) => (
+                                  <li
+                                    key={_qus.id}
+                                    className="_q_check_list flex cursor-pointer hover:bg-slate-400"
+                                    onClick={() => handleSuggestionClick(_qus.msg)}
+                                  >
+                                    {_qus.msg}
+                                  </li>
+                                ))}
                             </ul>
                             <div className="_arrow" />
                           </div>
@@ -264,20 +248,15 @@ const Chatbot = () => {
                   </button>
                 </div>
               </Paper>
-            </Fade>
-          )}
-        </Popper>
-        <div
-          className="_boat_button border-1 fixed bottom-2 left-2 flex cursor-pointer flex-col items-center justify-center rounded-full border border-gray-500 bg-gray-500"
-          role="presentation"
-          onClick={handleClick('top-start')}
-        >
-          <Image src={bIcon} width={35} height={35} alt="Picture of the author" />
-        </div>
-      </ChatbotWrapper>
-      <div ref={messagesEndRef} />
-    </Main>
+            </div>
+          </div>
+          <div style={{ flex: '30%', backgroundColor: '#034a32', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Image src={logoImage} alt="Logo" width={220} height={100} />
+          </div>
+        </Paper>
+      </div>
+    </ContainerWrapper>
   );
 };
 
-export default Chatbot;
+export default Container;
