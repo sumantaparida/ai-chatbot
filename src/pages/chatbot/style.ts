@@ -3,11 +3,10 @@ import styled from 'styled-components';
 const ChatbotWrapper = styled.section`
   background: #00d679;
   position: absolute;
-  height: 100vh;
+  min-height: 100vh;
+  max-height: 100vh;
   width: 100vw;
-  overflow: hidden;
   z-index: -1;
-
   &::before,
   &::after {
     content: '';
