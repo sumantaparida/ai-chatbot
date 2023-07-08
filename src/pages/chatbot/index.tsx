@@ -2,6 +2,7 @@
 // import type { PopperPlacementType } from '@mui/material/Popper';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import SendIcon from '@mui/icons-material/Send';
+import HelpSharpIcon from '@mui/icons-material/HelpSharp';
 import Paper from '@mui/material/Paper';
 import { color } from '@mui/system';
 // import Popper from '@mui/material/Popper';
@@ -55,6 +56,7 @@ const Chatbot: React.FC<Props> = () => {
       let apiUrl = 'http://localhost:8080/api/v1/data';
       const urlParams = new URLSearchParams(window.location.search);
       const idParam = urlParams.get('id');
+      // urlParams.get('id');
 
       if (idParam) {
         apiUrl += `?fileIds=${idParam}`;
@@ -133,14 +135,14 @@ const Chatbot: React.FC<Props> = () => {
       formData.append('file', file); // Append the file to the FormData object
 
       // Make a POST request to the upload URL
-      fetch('https://example.com/upload', {
+      fetch('http://localhost:8080/api/v1/document', {
         method: 'POST',
         body: formData,
       })
         .then(response => response.json())
         .then(data => {
           // Handle the response from the server
-          console.log('Upload successful:', data);
+          console.log('Upload successful:', data.id);
           setUploadedFileId(data.id);
         })
         .catch(error => {
@@ -285,8 +287,8 @@ const Chatbot: React.FC<Props> = () => {
                 })}
                 {/* <div ref={messagesEndRef} /> */}
               </div>
-              <div className="flex items-center flex-row justify-center p-2 bg-gray-300">
-                  <div className='flex flex-col'>
+              <div className="flex items-center flex-row justify-center p-2 bg-gray-300 mt-3">
+                <div className="flex flex-col">
                   <label
                     htmlFor="file-upload"
                     className="rounded-md bg-green-900 text-green-50 px-2 hover:bg-green-950 focus:outline-none flex items-center"
@@ -295,19 +297,25 @@ const Chatbot: React.FC<Props> = () => {
                     <UploadFileIcon className="item-center" style={{ height: '2rem' }} />
                   </label>
                   <input title="file" id="file-upload" type="file" accept=".pdf" style={{ display: 'none' }} onChange={handleFileUpload} />
-                  </div>
-                  <div className='flex flex-col flex-1'>
+                </div>
+                <div className="flex flex-col flex-1">
                   <form className="grow" onSubmit={appendMessage}>
                     <input
                       title="message"
                       type="text"
                       value={message}
                       onChange={handleInputChange}
+                      onKeyDown={e => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault(); // Prevent form submission
+                          appendMessage(); // Call the appendMessage function
+                        }
+                      }}
                       className="h-[36px] w-full rounded-md border border-gray-300 px-2 focus:outline-none ml-0"
                     />
                   </form>
-                  </div>
-                  <div className='flex flex-row'>
+                </div>
+                <div className="flex flex-row">
                   <button
                     type="submit"
                     className="mr-2 rounded-md bg-green-900 text-green-50 px-4 py-2 hover:bg-green-950 focus:outline-none flex items-center"
@@ -316,7 +324,7 @@ const Chatbot: React.FC<Props> = () => {
                   >
                     <SendIcon className="py-2 item-center" style={{ transform: 'rotate(315deg)', height: '2rem' }} />
                   </button>
-                  </div>
+                </div>
               </div>
             </div>
           </div>
