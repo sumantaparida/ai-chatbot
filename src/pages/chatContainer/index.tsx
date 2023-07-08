@@ -183,8 +183,8 @@ const Container = () => {
   };
   console.log(`Chatbot`, chatMessages);
   return (
-    <ContainerWrapper className="bg">
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
+    <ContainerWrapper>
+      <div className="flex items-center justify-center" style={{ height: '100vh' }}>
         <Paper
           style={{ width: '65%', backgroundColor: 'white', height: '65vh', display: 'flex', flexDirection: 'row', borderRadius: '30px', overflow: 'hidden' }}
           elevation={8}

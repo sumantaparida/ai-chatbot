@@ -11,6 +11,7 @@ import { Meta } from '@/layouts/Meta';
 import bIcon from '@/public/icons/bot.svg';
 import _bIcon from '@/public/icons/suraj.jpeg';
 import { Main } from '@/templates/Main';
+import logoImage from '@/public/assets/images/logo_turtlemint.svg';
 
 import ChatbotWrapper from './style';
 
@@ -181,7 +182,7 @@ const Chatbot: React.FC<Props> = () => {
   console.log(`Chatbot`, chatMessages);
   return (
     <Main meta={<Meta title="Chatbot" description="Chatbot" />}>
-      <ChatbotWrapper className="flex flex-row">
+      <ChatbotWrapper className="flex items-center justify-center" style={{ height: '100vh' }}>
         <Popper open={open} anchorEl={anchorEl} placement={placement} transition className="_chat_bot_wrapper">
           {({ TransitionProps }) => (
             <Fade {...TransitionProps} timeout={350}>
@@ -259,6 +260,81 @@ const Chatbot: React.FC<Props> = () => {
         >
           <Image src={bIcon} width={35} height={35} alt="Picture of the author" />
         </div>
+        <Paper
+          style={{ maxWidth: '50%', minHeight: '500px', borderRadius: '30px' }}
+          elevation={8}
+          className="flex flex-row overflow-auto bg-white _chat_bot_wrapper"
+        >
+          <div className="flex flex-col p-5 text-black" style={{ flex: '70%' }}>
+            <div className="_chat_bot_content flex flex-col">
+              <div className="_c_header flex flex-col bg-white text-green-950 font-bold">Renewal</div>
+              <div className="_c_content relative flex flex-1 flex-col gap-2 overflow-auto">
+                {chatMessages.map(mes => {
+                  const { msg, role, type, question, id }: { msg: any; role: string; type?: string; question?: []; id: number | string } = mes || {};
+                  if (type === 'suggestion') {
+                    return (
+                      <div key={id} className={`_r_chat flex flex-row gap-2 ${role === 'Customer' ? 'Customer flex-row-reverse' : 'BOT'}`}>
+                        <div className="_s_conv relative flex flex-1 flex-col rounded-md font-normal justify-center">
+                          <p className="_q_check_list">
+                            <span className="_q_mark">
+                              <HelpSharpIcon fontSize="medium" className="text-green-950" />
+                            </span>
+                            {question &&
+                              question.map((_qus: any) => {
+                                const { msg, id } = _qus || {};
+                                return (
+                                  <span
+                                    key={id}
+                                    className="_q_check_list hover:bg-green-900 bg-green-800 cursor-pointer list"
+                                    onClick={() => handleSuggestionClick(msg)}
+                                  >
+                                    {msg}
+                                  </span>
+                                );
+                              })}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  } else {
+                    return (
+                      <div key={mes.id} className={`_r_chat flex flex-row gap-2 ${role === 'Customer' ? 'Customer flex-row-reverse' : 'BOT'}`}>
+                        <div className="_prof flex flex-col items-center justify-center rounded-full bg-green-950 text-green-50">
+                          {role === 'BOT' ? <Image width={30} height={30} src={_bIcon} alt="bot" /> : 'C'}
+                        </div>
+                        <div className="_conv relative flex flex-1 flex-col rounded-md px-2 pt-1 pb-1 py-2 font-normal bg-green-700 items-start justify-center">
+                          {msg}
+                          <div className="_arrow" />
+                        </div>
+                      </div>
+                    );
+                  }
+                })}
+              </div>
+              <div className="flex items-center gap-5 pt-2">
+                <form className="grow" onSubmit={appendMessage}>
+                  <input
+                    title="message"
+                    type="text"
+                    value={message}
+                    onChange={handleInputChange}
+                    className="ml-2 h-[36px] w-full rounded-md border border-gray-300 px-2 focus:outline-none"
+                  />
+                </form>
+                <button
+                  type="submit"
+                  className="mr-2 rounded-md bg-green-900 text-green-50 px-4 py2 hover:bg-green-950 focus:outline-none"
+                  onClick={appendMessage}
+                >
+                  Send
+                </button>
+              </div>
+            </div>
+          </div>
+          <div className="flex items-center justify-center bg-green-950" style={{ flex: '30%' }}>
+            <Image src={logoImage} alt="Logo" width={220} height={100} />
+          </div>
+        </Paper>
       </ChatbotWrapper>
       <div ref={messagesEndRef} />
     </Main>
