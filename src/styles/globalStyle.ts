@@ -41,7 +41,7 @@ const GlobalStyle = createGlobalStyle`
           border: solid 1px #dedede;
           font-size: 14px;
           line-height: 18px;
-          word-break: break-all;
+          word-break: break-word;
         }
      }
     }
