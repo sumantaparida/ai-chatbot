@@ -30,6 +30,7 @@ interface Getquotes {
   ncb: string;
   cover_amount: string;
   logo: string;
+  paymentLink: string;
 }
 
 interface Suggestions {
@@ -42,7 +43,7 @@ interface Props {}
 const Chatbot: React.FC<Props> = () => {
   const [message, setMessage] = useState('');
   const [uploadedFileId, setUploadedFileId] = useState(null);
-  const [vertical, setVertical] = useState('common');
+  const [vertical, setVertical] = useState('COMMON');
   const [dotCount, setDotCount] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   // const [placement, setPlacement] = useState<PopperPlacementType>();
@@ -136,7 +137,7 @@ const Chatbot: React.FC<Props> = () => {
         if (vertical) {
           setVertical(vertical);
         } else {
-          setVertical('common');
+          setVertical('COMMON');
         }
       } else {
       }
@@ -172,7 +173,7 @@ const Chatbot: React.FC<Props> = () => {
 
   const _get_quotes = async () => {
     try {
-      const response = await fetch('https://renewals-1.free.beeceptor.com/api/v1/renewal/quotes');
+      const response = await fetch('http://localhost:8080/api/v1/autocomplete/getQuotes');
       if (response.ok) {
         const responseData = await response.json();
         setQuote(responseData);
@@ -185,13 +186,13 @@ const Chatbot: React.FC<Props> = () => {
 
   useEffect(() => {
     loadChatHistory();
-    const interval = setInterval(() => {
-      setDotCount((prevCount) => (prevCount + 1) % 4);
-    }, 300);
+    // const interval = setInterval(() => {
+    //   setDotCount(prevCount => (prevCount + 1) % 4);
+    // }, 300);
 
-    return () => {
-      clearInterval(interval);
-    };
+    // return () => {
+    //   clearInterval(interval);
+    // };
   }, []);
 
   useEffect(scrollToBottom, [chatMessages]);
@@ -377,9 +378,9 @@ const Chatbot: React.FC<Props> = () => {
                                       <span>{cover_amount}</span>
                                     </p>
                                   </div>
-                                  <a className="bg-green-700 text-white hover:bg-green-800" href={paymentLink} target="_blank" rel="noopener noreferrer">
+                                  <Link className="bg-green-700 text-white hover:bg-green-800" href={paymentLink} target="_blank" rel="noopener noreferrer">
                                     Buy
-                                  </a>
+                                  </Link>
                                 </div>
                               </div>
                             </div>
