@@ -8,6 +8,7 @@ import React, { useEffect, useRef, useState } from 'react';
 
 import { Meta } from '@/layouts/Meta';
 import bIcon from '@/public/icons/bot.svg';
+import _bIcon from '@/public/icons/suraj.jpeg';
 import { Main } from '@/templates/Main';
 
 import ChatbotWrapper from './style';
@@ -30,8 +31,9 @@ interface Suggestions {
   question: string;
   vertical: string;
 }
+interface Props {}
 
-const Chatbot = () => {
+const Chatbot: React.FC<Props> = () => {
   // const defaultMessage = {
   //   id: Date.now(),
   //   role: 'BOT',
@@ -52,31 +54,36 @@ const Chatbot = () => {
   };
 
   const loadChatHistory = async () => {
-    const response = await fetch('http://localhost:8080/api/v1/data?fileIds=58a1b8b3-74ae-452d-81b4-77e9eb662e24');
-    const data = await response.json();
+    try {
+      const response = await fetch('http://localhost:8080/api/v1/data?fileIds=58a1b8b3-74ae-452d-81b4-77e9eb662e24');
+      if (response.ok) {
+        const data = await response.json();
+        data.forEach((item: any) => {
+          // Extract the userType from the API response
+          const { userType } = item;
 
-    data.forEach((item: any) => {
-      // Extract the userType from the API response
-      const { userType } = item;
+          // Create a new message object for the bot response
+          const responseMessage: Message = {
+            id: Date.now(),
+            role: userType === 'Customer' ? 'Customer' : 'BOT',
+            msg: item.content || '', // Update this based on your API response structure
+          };
 
-      // Create a new message object for the bot response
-      const responseMessage: Message = {
-        id: Date.now(),
-        role: userType === 'Customer' ? 'Customer' : 'BOT',
-        msg: item.content || '', // Update this based on your API response structure
-      };
-
-      // Add the bot message to the chat messages
-      setChatMessages(prevMessages => [...prevMessages, responseMessage]);
-    });
+          // Add the bot message to the chat messages
+          setChatMessages(prevMessages => [...prevMessages, responseMessage]);
+        });
+        _suggestions();
+      }
+    } catch (error) {}
   };
 
   // eslint-disable-next-line @typescript-eslint/naming-convention, no-underscore-dangle
-  const _chatWithfileID = async (mes?: string) => {
+  const _chatWithfileID = async (mes?: string, suggestion?: boolean) => {
     const data = {
       fileId: 'c02d77ef-9be3-472e-86cd-9e0a5b35e599',
       question: mes || message || "give me insurer's name",
       docType: 'POLICY_DOCUMENT',
+      suggestion,
     };
     try {
       const response = await fetch('http://localhost:8080/api/v1/chat', {
@@ -151,7 +158,6 @@ const Chatbot = () => {
   useEffect(() => {
     // Fetch the API response
     loadChatHistory();
-    // scrollToBottom();
   }, []);
 
   const handleClick = (newPlacement: PopperPlacementType) => (event: React.MouseEvent<HTMLDivElement>) => {
@@ -196,8 +202,7 @@ const Chatbot = () => {
       msg: mes || '',
     };
     setChatMessages(prevMessages => [...prevMessages, _msg_obj_res]);
-    _chatWithfileID(mes);
-    console.log('Selected Suggestion', mes);
+    _chatWithfileID(mes, true);
     // appendMessage(); // Call the appendMessage function to add the message to chatMessages
   };
   console.log(`Chatbot`, chatMessages);
@@ -208,7 +213,7 @@ const Chatbot = () => {
           {({ TransitionProps }) => (
             <Fade {...TransitionProps} timeout={350}>
               <Paper className="_chat_bot_content flex flex-col" elevation={4}>
-                <div className="_c_header flex flex-col bg-gray-900 p-2">Renewal</div>
+                <div className="_c_header flex flex-col bg-green-950 p-2">Renewal</div>
                 <div className="_c_content relative flex flex-1 flex-col gap-2 overflow-auto p-2">
                   {chatMessages.map(mes => {
                     const { msg, role, type, question, id }: { msg: any; role: string; type?: string; question?: []; id: number | string } = mes || {};
@@ -216,15 +221,15 @@ const Chatbot = () => {
                       return (
                         // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-i[]nteractions
                         <div key={id} className={`_r_chat flex flex-row gap-2 ${role === 'Customer' ? 'Customer flex-row-reverse' : 'BOT'}`}>
-                          <div className="_prof flex flex-col items-center justify-center rounded-full bg-slate-400">s</div>
-                          <div className="_conv relative flex flex-1 flex-col rounded-md p-2 font-normal">
-                            <ul>
+                          <div className="_prof flex flex-col items-center justify-center rounded-full bg-green-950 text-green-50">s</div>
+                          <div className="_conv relative flex flex-1 flex-col rounded-md p-2 font-normal bg-green-700 items-start justify-center">
+                            <ul className="flex flex-col gap-1">
                               {question &&
                                 question.map((_qus: any) => {
                                   const { msg, id } = _qus || {};
                                   return (
-                                    <li key={id} className="_q_check_list flex hover:bg-slate-400 cursor-pointer" onClick={() => handleSuggestionClick(msg)}>
-                                      {msg}
+                                    <li key={id} className="_q_check_list flex" onClick={() => handleSuggestionClick(msg)}>
+                                      <span className="hover:bg-green-900 bg-green-800 cursor-pointer">{msg}</span>
                                     </li>
                                   );
                                 })}
@@ -236,8 +241,10 @@ const Chatbot = () => {
                     } else {
                       return (
                         <div key={mes.id} className={`_r_chat flex flex-row gap-2 ${role === 'Customer' ? 'Customer flex-row-reverse' : 'BOT'}`}>
-                          <div className="_prof flex flex-col items-center justify-center rounded-full bg-slate-400">s</div>
-                          <div className="_conv relative flex flex-1 flex-col rounded-md p-2 font-normal">
+                          <div className="_prof flex flex-col items-center justify-center rounded-full bg-green-950 text-green-50">
+                            {role === 'BOT' ? <Image width={30} height={30} src={_bIcon} alt="bot" /> : 'C'}
+                          </div>
+                          <div className="_conv relative flex flex-1 flex-col rounded-md px-2 pt-1 pb-1 py-2 font-normal bg-green-700 items-start justify-center">
                             {msg}
                             <div className="_arrow" />
                           </div>
@@ -246,7 +253,7 @@ const Chatbot = () => {
                     }
                   })}
                 </div>
-                <div className="flex items-center gap-5 py-2">
+                <div className="flex items-center gap-5 py-2 bg-green-900">
                   <form className="grow" onSubmit={appendMessage}>
                     <input
                       title="message"
@@ -258,7 +265,7 @@ const Chatbot = () => {
                   </form>
                   <button
                     type="submit"
-                    className="mr-2 rounded-md bg-gray-700 px-4 py-2 text-white hover:bg-gray-800 focus:outline-none"
+                    className="mr-2 rounded-md bg-green-900 text-green-50 px-4 py-2 hover:bg-green-950 focus:outline-none"
                     onClick={appendMessage}
                   >
                     Send
@@ -269,7 +276,7 @@ const Chatbot = () => {
           )}
         </Popper>
         <div
-          className="_boat_button border-1 fixed bottom-2 left-2 flex cursor-pointer flex-col items-center justify-center rounded-full border border-gray-500 bg-gray-500"
+          className="_boat_button border-1 fixed bottom-2 left-2 flex cursor-pointer flex-col items-center justify-center rounded-full border bg-green-950 text-green-50"
           role="presentation"
           onClick={handleClick('top-start')}
         >

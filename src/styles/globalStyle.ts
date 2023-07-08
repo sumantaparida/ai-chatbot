@@ -15,7 +15,7 @@ const GlobalStyle = createGlobalStyle`
             top: 13px;
             border-top: 8px solid transparent;
             border-bottom: 8px solid transparent;
-            border-left: 8px solid #ced9e1;
+            border-left: 8px solid #15803d;
           }
         }
         &.BOT {
@@ -24,7 +24,7 @@ const GlobalStyle = createGlobalStyle`
             top: 13px;
             border-top: 8px solid transparent;
             border-bottom: 8px solid transparent;
-            border-right: 8px solid #ced9e1;
+            border-right: 8px solid #15803d;
           }
         }
         ._arrow {
@@ -36,12 +36,22 @@ const GlobalStyle = createGlobalStyle`
           width: 40px;
           height: 40px;
           border: 1px solid #ced9e1;
+          box-shadow: 0px 4px 5px #2f2f2f80;
+          overflow: hidden;
         }
         ._conv {
-          border: solid 1px #dedede;
           font-size: 14px;
           line-height: 18px;
           word-break: break-word;
+          color: #fff;
+          box-shadow: 0px 4px 5px #2f2f2f80;
+          max-width: 240px;
+          ._q_check_list {
+            span {
+              padding: 3px 5px;
+              border-radius: 5px;
+            }
+          }
         }
      }
     }

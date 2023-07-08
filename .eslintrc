@@ -30,9 +30,7 @@
         "plugin:tailwindcss/recommended",
         "airbnb",
         "airbnb-typescript",
-        "airbnb/hooks",
-        "next/core-web-vitals",
-        "plugin:prettier/recommended"
+        "airbnb/hooks"
       ],
       "parserOptions": {
         "project": "./tsconfig.json"
