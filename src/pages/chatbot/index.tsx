@@ -3,7 +3,7 @@ import Paper from '@mui/material/Paper';
 import type { PopperPlacementType } from '@mui/material/Popper';
 import Popper from '@mui/material/Popper';
 import Image from 'next/image';
-import type { ChangeEvent, ReactNode } from 'react';
+import type { ChangeEvent } from 'react';
 import React, { useEffect, useRef, useState } from 'react';
 
 import { Meta } from '@/layouts/Meta';
@@ -11,10 +11,6 @@ import bIcon from '@/public/icons/bot.svg';
 import { Main } from '@/templates/Main';
 
 import ChatbotWrapper from './style';
-
-type ChatbotProps = {
-  children?: ReactNode;
-};
 
 // type Message = {
 //   id: number;
@@ -34,7 +30,9 @@ interface Suggestions {
   vertical: string;
 }
 
-const Chatbot = (props: ChatbotProps) => {
+let renderProfile = true;
+
+const Chatbot = () => {
   // const defaultMessage = {
   //   id: Date.now(),
   //   role: 'BOT',
@@ -55,7 +53,7 @@ const Chatbot = (props: ChatbotProps) => {
   };
 
   const loadChatHistory = async () => {
-    const response = await fetch('http://localhost:8080/api/v1/data?fileIds=c02d77ef-9be3-472e-86cd-9e0a5b35e599');
+    const response = await fetch('http://localhost:8080/api/v1/data?fileIds=58a1b8b3-74ae-452d-81b4-77e9eb662e24');
     const data = await response.json();
 
     data.forEach((item: any) => {
@@ -74,6 +72,7 @@ const Chatbot = (props: ChatbotProps) => {
     });
   };
 
+  // eslint-disable-next-line @typescript-eslint/naming-convention, no-underscore-dangle
   const _chatWithfileID = async () => {
     const data = {
       fileId: 'c02d77ef-9be3-472e-86cd-9e0a5b35e599',
@@ -95,6 +94,7 @@ const Chatbot = (props: ChatbotProps) => {
         const { question, answer } = responseData || {};
         // Process the response data
         console.log('responseData', question, answer);
+        // eslint-disable-next-line no-underscore-dangle, @typescript-eslint/naming-convention
         const _msg_obj_res: Message = {
           id: Date.now(),
           role: 'BOT',
@@ -111,9 +111,11 @@ const Chatbot = (props: ChatbotProps) => {
     }
   };
 
+  // eslint-disable-next-line @typescript-eslint/naming-convention, no-underscore-dangle
   const _suggestions = async () => {
     try {
       const response = await fetch('http://localhost:8080/api/v1/autocomplete/suggestions?prefix=what&vertical=FW');
+      // eslint-disable-next-line no-underscore-dangle, @typescript-eslint/naming-convention
       let _RES_OBJ: any = [];
       if (response.ok) {
         // POST request successful
@@ -158,8 +160,9 @@ const Chatbot = (props: ChatbotProps) => {
     setMessage(_in_str);
   };
 
-  const appendMessage = async (event: any) => {
-    event.preventDefault();
+  const appendMessage = async () => {
+    // event.preventDefault();
+    console.log(message);
     if (message) {
       // eslint-disable-next-line no-underscore-dangle, @typescript-eslint/naming-convention
       const _msg_obj: Message = {
@@ -178,6 +181,11 @@ const Chatbot = (props: ChatbotProps) => {
       scrollToBottom();
     }
   };
+  const handleSuggestionClick = (mes: any) => {
+    setMessage(mes); // Set the clicked message as the input value
+    console.log(message);
+    appendMessage(); // Call the appendMessage function to add the message to chatMessages
+  };
   console.log(`Chatbot`, chatMessages);
   return (
     <Main meta={<Meta title="Chatbot" description="Chatbot" />}>
@@ -189,7 +197,40 @@ const Chatbot = (props: ChatbotProps) => {
                 <div className="_c_header flex flex-col bg-gray-900 p-2">Renewal</div>
                 <div className="_c_content relative flex flex-1 flex-col gap-2 overflow-auto p-2">
                   {chatMessages.map(mes => {
-                    const { msg, role }: { msg: any; role: string } = mes || {};
+                    const { msg, role, type }: { msg: any; role: string; type?: string } = mes || {};
+                    if (type === 'suggestion') {
+                      if (renderProfile) {
+                        renderProfile = false;
+                        return (
+                          // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
+                          <div
+                            key={mes.id}
+                            className={`_r_chat flex flex-row gap-2 ${role === 'Customer' ? 'Customer flex-row-reverse' : 'BOT'}`}
+                            onClick={() => handleSuggestionClick(msg)}
+                          >
+                            <div className="_prof flex flex-col items-center justify-center rounded-full bg-slate-400">s</div>
+                            <div className="_conv relative flex flex-1 flex-col rounded-md p-2 font-normal">
+                              {msg}
+                              {/* <div className="_arrow" /> */}
+                            </div>
+                          </div>
+                        );
+                      }
+                      return (
+                        // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
+                        <div
+                          key={mes.id}
+                          className={`_r_chat flex flex-row gap-2 ${role === 'Customer' ? 'Customer flex-row-reverse' : 'BOT'}`}
+                          onClick={() => handleSuggestionClick(msg)}
+                        >
+                          <div className="_conv relative ml-12 flex flex-1 flex-col rounded-md p-2 font-normal">
+                            {msg}
+                            {/* <div className="_arrow" /> */}
+                          </div>
+                        </div>
+                      );
+                    }
+                    renderProfile = true;
                     return (
                       <div key={mes.id} className={`_r_chat flex flex-row gap-2 ${role === 'Customer' ? 'Customer flex-row-reverse' : 'BOT'}`}>
                         <div className="_prof flex flex-col items-center justify-center rounded-full bg-slate-400">s</div>
