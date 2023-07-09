@@ -45,12 +45,16 @@ const GlobalStyle = createGlobalStyle`
           color: #fff;
           box-shadow: 0px 4px 5px #2f2f2f80;
           max-width: 380px;
+          pre {
+            white-space: pre-wrap;
+          }
         }
         ._s_conv {
           font-size: 14px;
           line-height: 18px;
           word-break: break-word;
           color: #fff;
+        }
           ._q_check_list {
             text-align: right;
             ._q_mark {

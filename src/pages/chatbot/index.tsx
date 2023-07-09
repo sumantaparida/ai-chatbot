@@ -48,17 +48,13 @@ const Chatbot: React.FC<Props> = () => {
   const [uploadedFileId, setUploadedFileId] = useState(null);
   const [vertical, setVertical] = useState('COMMON');
   const [isLoading, setIsLoading] = useState(false);
-  // const [placement, setPlacement] = useState<PopperPlacementType>();
   const [chatMessages, setChatMessages] = useState<Message[]>([]);
-  // const [getQuote, setQuote] = useState<Getquotes[]>([]);
 
   const scrollToBottom = () => {
     const chatWindow = document.getElementsByClassName('_c_content')[0];
     if (chatWindow) {
       chatWindow.scrollTop = chatWindow.scrollHeight;
     }
-
-    // messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
   function getUrlParam(param: any) {
@@ -221,7 +217,7 @@ const Chatbot: React.FC<Props> = () => {
         role: 'Customer',
         msg: message || '',
       };
-      if ((message !== 'quote' && getUrlParam('fileIds')) || uploadedFileId) {
+      if (message !== 'quote' && (getUrlParam('fileIds') || uploadedFileId)) {
         _chatWithfileID();
       }
       if (message === 'FW') {
@@ -253,12 +249,18 @@ const Chatbot: React.FC<Props> = () => {
       })
         .then(response => response.json())
         .then(data => {
-          const { fileId } = data || {};
+          const { fileId, defaultAnswer } = data || {};
+          const _msg_obj: Message = {
+            id: Date.now(),
+            role: 'BOT',
+            type: 'default',
+            msg: defaultAnswer || '',
+          };
           // Handle the response from the server
-          console.log('Upload successful:', fileId);
+          setChatMessages(prevMessages => [...prevMessages, _msg_obj]);
           setUploadedFileId(fileId);
           setIsLoading(false);
-          _suggestions();
+          // _suggestions();
         })
         .catch(error => {
           // Handle any error that occurred during the upload
@@ -281,7 +283,7 @@ const Chatbot: React.FC<Props> = () => {
     }
     // appendMessage(); // Call the appendMessage function to add the message to chatMessages
   };
-  console.log(`Chatbot`, chatMessages);
+  console.log(`CHAT_BOX`, chatMessages);
   return (
     <Main meta={<Meta title="Chatbot" description="Chatbot" />}>
       <ChatbotWrapper className="flex items-center justify-center overflow-hidden">
@@ -445,6 +447,18 @@ const Chatbot: React.FC<Props> = () => {
                                 </div>
                               );
                             })}
+                        </div>
+                      </div>
+                    );
+                  } else if (type === 'default') {
+                    return (
+                      <div key={mes.id} className={`_r_chat flex flex-row gap-2 ${role === 'Customer' ? 'Customer flex-row-reverse' : 'BOT'}`}>
+                        <div className="_prof flex flex-col items-center justify-center rounded-full bg-green-950 text-green-50">
+                          {role === 'BOT' ? <Image width={30} height={30} src={_bIcon} alt="bot" /> : 'C'}
+                        </div>
+                        <div className="_conv relative flex flex-col rounded-md px-2 pt-1 pb-1 py-2 font-normal bg-green-700 items-start justify-center">
+                          <pre className="_default_msg">{msg}</pre>
+                          <div className="_arrow" />
                         </div>
                       </div>
                     );

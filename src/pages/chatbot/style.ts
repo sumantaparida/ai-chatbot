@@ -71,6 +71,10 @@ const ChatbotWrapper = styled.section`
       }
     }
   }
+  ._default_msg {
+    font-size: 12px;
+    white-space: pre-wrap;
+  }
 `;
 
 export default ChatbotWrapper;
